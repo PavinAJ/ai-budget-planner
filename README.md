@@ -19,4 +19,12 @@ A responsive, AI-powered personal finance planner and budget assistant. Built wi
 ---
 
 ## 📁 Folder Structure
-
+ai-budget-planner/
+├── index.html # Main HTML file
+├── css/
+│ └── styles.css # (optional if separated)
+├── js/
+│ └── main.js # Modular JavaScript (future)
+├── assets/
+│ └── screenshot.png # Preview image
+└── README.md
