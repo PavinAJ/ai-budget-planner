@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Financial Advisor & Budget Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --border: #e2e8f0;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--gradient-1);
+            opacity: 0.1;
+            transform: rotate(45deg);
+            z-index: 0;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: var(--gradient-3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Card System */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Financial Health Score */
+        .health-score-container {
+            background: var(--gradient-1);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-score {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 20px 0;
+            animation: scoreReveal 1s ease-out;
+        }
+
+        @keyframes scoreReveal {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .score-meter {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .score-circle {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .score-circle-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.2);
+            stroke-width: 20;
+        }
+
+        .score-circle-progress {
+            fill: none;
+            stroke: white;
+            stroke-width: 20;
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 565.48;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.5s ease-out;
+        }
+
+        /* Form Enhancements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Advanced Toggle Switches */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: var(--border);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(25px);
+        }
+
+        /* Budget Categories Enhancement */
+        .budget-category {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .budget-category:hover {
+            transform: translateX(5px);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .category-progress {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .category-progress-fill {
+            height: 100%;
+            background: var(--gradient-3);
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.3),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* AI Insights Panel */
+        .ai-insights {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-insights::before {
+            content: '🤖';
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 3rem;
+            opacity: 0.2;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .insight-text {
+            flex: 1;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        /* Action Buttons */
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+        }
+
+        .btn-gradient {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        /* Charts Container */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        /* Summary Grid */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-item h3,
+        .summary-item h4 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .summary-item p {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .health-score {
+                font-size: 3rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .debt-section .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .btn, .toggle-switch, .category-header {
+                display: none !important;
+            }
+            
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Tooltip System */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip-content {
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover .tooltip-content {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--dark);
+        }
+
+        /* Progress Indicators */
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 4;
+        }
+
+        .progress-ring-progress {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 4;
+            stroke-dasharray: 188.5;
+            stroke-dashoffset: 188.5;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: center;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        /* Debt Section Styles */
+        .debt-section {
+            transition: all 0.3s ease;
+        }
+
+        .debt-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Budget Input Styles */
+        .budget-input {
+            transition: all 0.3s;
+        }
+
+        .budget-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Tab System */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: var(--secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Enhanced Header -->
+        <div class="header">
+            <h1>
+                🤖 AI Financial Advisor & Budget Assistant
+                <span class="ai-badge">Powered by AI</span>
+            </h1>
+            <p>Your intelligent companion for comprehensive financial planning and wealth building</p>
+        </div>
+
+        <!-- Financial Health Score Dashboard -->
+        <div class="health-score-container hidden" id="healthScoreContainer">
+            <h2>Your Financial Health Score</h2>
+            <div class="score-meter">
+                <svg class="score-circle" viewBox="0 0 200 200">
+                    <circle class="score-circle-bg" cx="100" cy="100" r="90"></circle>
+                    <circle class="score-circle-progress" cx="100" cy="100" r="90" id="scoreProgress"></circle>
+                </svg>
+                <div class="health-score" id="healthScore">0</div>
+            </div>
+            <p id="scoreDescription">Complete your profile to see your score</p>
+        </div>
+
+        <!-- AI Insights Panel -->
+        <div class="ai-insights hidden" id="aiInsights">
+            <h3 style="margin-bottom: 20px;">🤖 AI Financial Insights</h3>
+            <div id="insightsContent"></div>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('profile')">Profile Setup</button>
+            <button class="tab" onclick="switchTab('budget')">Budget Planner</button>
+            <button class="tab" onclick="switchTab('analysis')">Analysis & Reports</button>
+            <button class="tab" onclick="switchTab('advisor')">AI Advisor</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <!-- Profile Tab -->
+        <div class="tab-content active" id="profile-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>👤</span>
+                        Personal & Financial Profile
+                    </h2>
+                </div>
+                
+                <form id="profileForm">
+                    <h3>Basic Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="age">Your Age</label>
+                            <input type="number" id="age" min="18" max="100" value="30" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="maritalStatus">Marital Status</label>
+                            <select id="maritalStatus" onchange="handleMaritalStatusChange()">
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="divorced">Divorced</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="spouseAgeGroup" style="display: none;">
+                            <label for="spouseAge">Spouse's Age</label>
+                            <input type="number" id="spouseAge" min="18" max="100" value="28">
+                        </div>
+                        <div class="form-group">
+                            <label for="dependents">Number of Dependents</label>
+                            <input type="number" id="dependents" min="0" max="10" value="0" onchange="updateDependentsDetails()">
+                        </div>
+                    </div>
+
+                    <div id="dependentsContainer"></div>
+
+                    <h3 style="margin-top: 30px;">Income & Employment</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="income">Monthly Income (After Tax)</label>
+                            <input type="number" id="income" min="0" step="100" value="10000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="currency">Currency</label>
+                            <select id="currency">
+                                <option value="USD">USD ($)</option>
+                                <option value="AED">AED (د.إ)</option>
+                                <option value="INR">INR (₹)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="CAD">CAD (C$)</option>
+                                <option value="AUD">AUD (A$)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employmentType">Employment Type</label>
+                            <select id="employmentType">
+                                <option value="salaried">Salaried</option>
+                                <option value="self-employed">Self-Employed</option>
+                                <option value="business">Business Owner</option>
+                                <option value="freelancer">Freelancer</option>
+                                <option value="retired">Retired</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="jobStability">Job Stability</label>
+                            <select id="jobStability">
+                                <option value="very-stable">Very Stable (5+ years)</option>
+                                <option value="stable">Stable (2-5 years)</option>
+                                <option value="moderate">Moderate (1-2 years)</option>
+                                <option value="new">New Job (<1 year)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Family Planning</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Planning for Children?
+                                <div class="toggle-container">
+                                    <div class="toggle-switch" id="planningChildrenToggle" onclick="toggleSwitch('planningChildren')"></div>
+                                    <span>No</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-group" id="plannedChildrenGroup" style="display: none;">
+                            <label for="plannedChildren">Number of Planned Children</label>
+                            <input type="number" id="plannedChildren" min="0" max="5" value="1">
+                        </div>
+                        <div class="form-group" id="childTimelineGroup" style="display: none;">
+                            <label for="childTimeline">Planning Timeline (Years)</label>
+                            <select id="childTimeline">
+                                <option value="1">Within 1 year</option>
+                                <option value="2">1-2 years</option>
+                                <option value="5">3-5 years</option>
+                                <option value="10">5-10 years</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="childEducationFund">Child Education Fund Target</label>
+                            <input type="number" id="childEducationFund" min="0" value="0" placeholder="Per child amount">
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Fixed Monthly Expenses</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="rentAmount">Monthly Rent</label>
+                            <input type="number" id="rentAmount" min="0" value="0" placeholder="0 if you own home">
+                        </div>
+                        <div class="form-group">
+                            <label for="utilities">Utilities (Electricity, Water, Gas)</label>
+                            <input type="number" id="utilities" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="internetPhone">Internet & Phone</label>
+                            <input type="number" id="internetPhone" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="maintenance">Maintenance & HOA</label>
+                            <input type="number" id="maintenance" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="houseHelp">House Help/Maid</label>
+                            <input type="number" id="houseHelp" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="subscriptions">Subscriptions (Netflix, Gym, etc.)</label>
+                            <input type="number" id="subscriptions" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Assets & Liabilities</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="currentSavings">Current Savings
+                                <span class="tooltip">ℹ️
+                                    <span class="tooltip-content">Total in savings accounts</span>
+                                </span>
+                            </label>
+                            <input type="number" id="currentSavings" min="0" value="5000">
+                        </div>
+                        <div class="form-group">
+                            <label for="currentInvestments">Current Investments
+                                <span class="tooltip">ℹ️
+                                    <span class="tooltip-content">Stocks, bonds, mutual funds, etc.</span>
+                                </span>
+                            </label>
+                            <input type="number" id="currentInvestments" min="0" value="10000">
+                        </div>
+                        <div class="form-group">
+                            <label for="propertyValue">Property Value</label>
+                            <input type="number" id="propertyValue" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="otherAssets">Other Assets</label>
+                            <input type="number" id="otherAssets" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Debts & Obligations</h3>
+                    
+                    <!-- Home Loan -->
+                    <div class="debt-section" style="margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: 10px;">
+                        <label style="display: block; margin-bottom: 10px;">
+                            <strong>Home Loan</strong>
+                            <div class="toggle-container">
+                                <div class="toggle-switch" id="homeLoanToggle" onclick="toggleDebt('homeLoan')"></div>
+                                <span>No</span>
+                            </div>
+                        </label>
+                        <div class="form-grid" id="homeLoanDetails" style="display: none;">
+                            <div class="form-group">
+                                <label for="homeLoanEmi">Monthly EMI</label>
+                                <input type="number" id="homeLoanEmi" min="0" placeholder="EMI Amount">
+                            </div>
+                            <div class="form-group">
+                                <label for="homeLoanMonths">Months Remaining</label>
+                                <input type="number" id="homeLoanMonths" min="0" placeholder="Months">
+                            </div>
+                            <div class="form-group">
+                                <label for="homeLoanBalance">Outstanding Balance</label>
+                                <input type="number" id="homeLoanBalance" min="0" placeholder="Total Balance">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Car Loan -->
+                    <div class="debt-section" style="margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: 10px;">
+                        <label style="display: block; margin-bottom: 10px;">
+                            <strong>Car Loan</strong>
+                            <div class="toggle-container">
+                                <div class="toggle-switch" id="carLoanToggle" onclick="toggleDebt('carLoan')"></div>
+                                <span>No</span>
+                            </div>
+                        </label>
+                        <div class="form-grid" id="carLoanDetails" style="display: none;">
+                            <div class="form-group">
+                                <label for="carLoanEmi">Monthly EMI</label>
+                                <input type="number" id="carLoanEmi" min="0" placeholder="EMI Amount">
+                            </div>
+                            <div class="form-group">
+                                <label for="carLoanMonths">Months Remaining</label>
+                                <input type="number" id="carLoanMonths" min="0" placeholder="Months">
+                            </div>
+                            <div class="form-group">
+                                <label for="carLoanBalance">Outstanding Balance</label>
+                                <input type="number" id="carLoanBalance" min="0" placeholder="Total Balance">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Loan -->
+                    <div class="debt-section" style="margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: 10px;">
+                        <label style="display: block; margin-bottom: 10px;">
+                            <strong>Personal Loan</strong>
+                            <div class="toggle-container">
+                                <div class="toggle-switch" id="personalLoanToggle" onclick="toggleDebt('personalLoan')"></div>
+                                <span>No</span>
+                            </div>
+                        </label>
+                        <div class="form-grid" id="personalLoanDetails" style="display: none;">
+                            <div class="form-group">
+                                <label for="personalLoanEmi">Monthly EMI</label>
+                                <input type="number" id="personalLoanEmi" min="0" placeholder="EMI Amount">
+                            </div>
+                            <div class="form-group">
+                                <label for="personalLoanMonths">Months Remaining</label>
+                                <input type="number" id="personalLoanMonths" min="0" placeholder="Months">
+                            </div>
+                            <div class="form-group">
+                                <label for="personalLoanBalance">Outstanding Balance</label>
+                                <input type="number" id="personalLoanBalance" min="0" placeholder="Total Balance">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credit Card Debt -->
+                    <div class="debt-section" style="margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: 10px;">
+                        <label style="display: block; margin-bottom: 10px;">
+                            <strong>Credit Card Debt</strong>
+                            <div class="toggle-container">
+                                <div class="toggle-switch" id="creditCardToggle" onclick="toggleDebt('creditCard')"></div>
+                                <span>No</span>
+                            </div>
+                        </label>
+                        <div class="form-grid" id="creditCardDetails" style="display: none;">
+                            <div class="form-group">
+                                <label for="creditCardBalance">Outstanding Balance</label>
+                                <input type="number" id="creditCardBalance" min="0" placeholder="Total Balance">
+                            </div>
+                            <div class="form-group">
+                                <label for="creditCardMinimum">Minimum Payment</label>
+                                <input type="number" id="creditCardMinimum" min="0" placeholder="Monthly Minimum">
+                            </div>
+                            <div class="form-group">
+                                <label for="creditCardRate">Interest Rate (%)</label>
+                                <input type="number" id="creditCardRate" min="0" max="50" step="0.1" placeholder="APR">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Loans -->
+                    <div class="debt-section" style="margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: 10px;">
+                        <label style="display: block; margin-bottom: 10px;">
+                            <strong>Other Loans (Education, Business, etc.)</strong>
+                            <div class="toggle-container">
+                                <div class="toggle-switch" id="otherLoanToggle" onclick="toggleDebt('otherLoan')"></div>
+                                <span>No</span>
+                            </div>
+                        </label>
+                        <div class="form-grid" id="otherLoanDetails" style="display: none;">
+                            <div class="form-group">
+                                <label for="otherLoanType">Loan Type</label>
+                                <input type="text" id="otherLoanType" placeholder="e.g., Education Loan">
+                            </div>
+                            <div class="form-group">
+                                <label for="otherLoanEmi">Monthly EMI</label>
+                                <input type="number" id="otherLoanEmi" min="0" placeholder="EMI Amount">
+                            </div>
+                            <div class="form-group">
+                                <label for="otherLoanMonths">Months Remaining</label>
+                                <input type="number" id="otherLoanMonths" min="0" placeholder="Months">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Financial Goals & Priorities</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Primary Financial Goal</label>
+                            <select id="primaryGoal">
+                                <option value="emergency-fund">Build Emergency Fund</option>
+                                <option value="debt-free">Become Debt-Free</option>
+                                <option value="retirement">Retirement Planning</option>
+                                <option value="wealth">Wealth Building</option>
+                                <option value="home">Buy a Home</option>
+                                <option value="education">Children's Education</option>
+                                <option value="fire">Financial Independence</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Risk Tolerance</label>
+                            <select id="riskTolerance">
+                                <option value="conservative">Conservative (Low Risk)</option>
+                                <option value="moderate">Moderate (Balanced)</option>
+                                <option value="aggressive">Aggressive (High Risk)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Investment Experience</label>
+                            <select id="investmentExperience">
+                                <option value="none">No Experience</option>
+                                <option value="beginner">Beginner (< 2 years)</option>
+                                <option value="intermediate">Intermediate (2-5 years)</option>
+                                <option value="advanced">Advanced (5+ years)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Retirement Age</label>
+                            <input type="number" id="retirementAge" min="40" max="80" value="60">
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button type="button" class="btn btn-primary" onclick="generateComprehensiveAnalysis()">
+                            <span>🚀</span>
+                            Generate AI Financial Plan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Budget Tab -->
+        <div class="tab-content" id="budget-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>💰</span>
+                        Smart Budget Allocation
+                    </h2>
+                </div>
+                <div id="budgetContent">
+                    <p style="text-align: center; color: var(--secondary); padding: 40px;">
+                        Complete your profile first to generate a personalized budget plan
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Tab -->
+        <div class="tab-content" id="analysis-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>📊</span>
+                        Financial Analysis & Reports
+                    </h2>
+                </div>
+                <div id="analysisContent">
+                    <p style="text-align: center; color: var(--secondary); padding: 40px;">
+                        Complete your profile to see detailed analysis and projections
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Advisor Tab -->
+        <div class="tab-content" id="advisor-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>🤖</span>
+                        AI Financial Advisor
+                    </h2>
+                </div>
+                <div id="advisorContent">
+                    <p style="text-align: center; color: var(--secondary); padding: 40px;">
+                        Your AI advisor will be available after profile completion
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state management
+        let userProfile = {};
+        let budgetData = {};
+        let financialAnalysis = {};
+        
+        // Currency formatting
+        const currencySymbols = {
+            'USD': '$',
+            'AED': 'د.إ',
+            'INR': '₹',
+            'EUR': '€',
+            'GBP': '£',
+            'CAD': 'C$',
+            'AUD': 'A$'
+        };
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Set event listeners
+            document.getElementById('profileForm').addEventListener('change', handleProfileChange);
+            
+            // Initialize default states
+            handleMaritalStatusChange();
+            updateDependentsDetails();
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // Toggle switches
+        function toggleSwitch(type) {
+            const toggle = document.getElementById(`${type}Toggle`);
+            const isActive = !toggle.classList.contains('active');
+            
+            toggle.classList.toggle('active');
+            toggle.nextElementSibling.textContent = isActive ? 'Yes' : 'No';
+            
+            // Handle family planning toggle
+            if (type === 'planningChildren') {
+                document.getElementById('plannedChildrenGroup').style.display = isActive ? 'block' : 'none';
+                document.getElementById('childTimelineGroup').style.display = isActive ? 'block' : 'none';
+            }
+        }
+
+        // Toggle debt sections
+        function toggleDebt(type) {
+            const toggle = document.getElementById(`${type}Toggle`);
+            const details = document.getElementById(`${type}Details`);
+            const isActive = !toggle.classList.contains('active');
+            
+            toggle.classList.toggle('active');
+            toggle.nextElementSibling.textContent = isActive ? 'Yes' : 'No';
+            details.style.display = isActive ? 'block' : 'none';
+            
+            if (!isActive) {
+                // Clear values when toggled off
+                details.querySelectorAll('input').forEach(input => input.value = '');
+            }
+        }
+
+        // Handle marital status change
+        function handleMaritalStatusChange() {
+            const maritalStatus = document.getElementById('maritalStatus').value;
+            const spouseAgeGroup = document.getElementById('spouseAgeGroup');
+            spouseAgeGroup.style.display = maritalStatus === 'married' ? 'block' : 'none';
+        }
+
+        // Update dependents details
+        function updateDependentsDetails() {
+            const count = parseInt(document.getElementById('dependents').value) || 0;
+            const container = document.getElementById('dependentsContainer');
+            
+            if (count === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '<h3 style="margin-top: 20px;">Dependents Details</h3><div class="form-grid">';
+            
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div class="form-group">
+                        <label for="dependent${i}">Dependent ${i + 1} Type</label>
+                        <select id="dependent${i}">
+                            <option value="child">Child</option>
+                            <option value="parent">Parent</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dependentAge${i}">Age</label>
+                        <input type="number" id="dependentAge${i}" min="0" max="100" value="10">
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Handle profile changes
+        function handleProfileChange() {
+            // Auto-save profile data
+            collectUserProfile();
+        }
+
+        // Collect user profile data
+        function collectUserProfile() {
+            userProfile = {
+                // Basic info
+                age: parseInt(document.getElementById('age').value) || 30,
+                maritalStatus: document.getElementById('maritalStatus').value,
+                spouseAge: document.getElementById('maritalStatus').value === 'married' ? 
+                    parseInt(document.getElementById('spouseAge').value) || 0 : null,
+                dependents: parseInt(document.getElementById('dependents').value) || 0,
+                
+                // Family Planning
+                planningChildren: document.getElementById('planningChildrenToggle').classList.contains('active'),
+                plannedChildren: document.getElementById('planningChildrenToggle').classList.contains('active') ? 
+                    parseInt(document.getElementById('plannedChildren').value) || 0 : 0,
+                childTimeline: document.getElementById('planningChildrenToggle').classList.contains('active') ? 
+                    parseInt(document.getElementById('childTimeline').value) || 0 : 0,
+                childEducationFund: parseFloat(document.getElementById('childEducationFund').value) || 0,
+                
+                // Income & Employment
+                income: parseFloat(document.getElementById('income').value) || 0,
+                currency: document.getElementById('currency').value,
+                employmentType: document.getElementById('employmentType').value,
+                jobStability: document.getElementById('jobStability').value,
+                
+                // Fixed Expenses
+                fixedExpenses: {
+                    rent: parseFloat(document.getElementById('rentAmount').value) || 0,
+                    utilities: parseFloat(document.getElementById('utilities').value) || 0,
+                    internetPhone: parseFloat(document.getElementById('internetPhone').value) || 0,
+                    maintenance: parseFloat(document.getElementById('maintenance').value) || 0,
+                    houseHelp: parseFloat(document.getElementById('houseHelp').value) || 0,
+                    subscriptions: parseFloat(document.getElementById('subscriptions').value) || 0
+                },
+                
+                // Assets
+                currentSavings: parseFloat(document.getElementById('currentSavings').value) || 0,
+                currentInvestments: parseFloat(document.getElementById('currentInvestments').value) || 0,
+                propertyValue: parseFloat(document.getElementById('propertyValue').value) || 0,
+                otherAssets: parseFloat(document.getElementById('otherAssets').value) || 0,
+                
+                // Detailed Debts
+                debts: {
+                    homeLoan: {
+                        active: document.getElementById('homeLoanToggle').classList.contains('active'),
+                        emi: parseFloat(document.getElementById('homeLoanEmi')?.value) || 0,
+                        monthsRemaining: parseInt(document.getElementById('homeLoanMonths')?.value) || 0,
+                        balance: parseFloat(document.getElementById('homeLoanBalance')?.value) || 0
+                    },
+                    carLoan: {
+                        active: document.getElementById('carLoanToggle').classList.contains('active'),
+                        emi: parseFloat(document.getElementById('carLoanEmi')?.value) || 0,
+                        monthsRemaining: parseInt(document.getElementById('carLoanMonths')?.value) || 0,
+                        balance: parseFloat(document.getElementById('carLoanBalance')?.value) || 0
+                    },
+                    personalLoan: {
+                        active: document.getElementById('personalLoanToggle').classList.contains('active'),
+                        emi: parseFloat(document.getElementById('personalLoanEmi')?.value) || 0,
+                        monthsRemaining: parseInt(document.getElementById('personalLoanMonths')?.value) || 0,
+                        balance: parseFloat(document.getElementById('personalLoanBalance')?.value) || 0
+                    },
+                    creditCard: {
+                        active: document.getElementById('creditCardToggle').classList.contains('active'),
+                        balance: parseFloat(document.getElementById('creditCardBalance')?.value) || 0,
+                        minimum: parseFloat(document.getElementById('creditCardMinimum')?.value) || 0,
+                        rate: parseFloat(document.getElementById('creditCardRate')?.value) || 0
+                    },
+                    otherLoan: {
+                        active: document.getElementById('otherLoanToggle').classList.contains('active'),
+                        type: document.getElementById('otherLoanType')?.value || '',
+                        emi: parseFloat(document.getElementById('otherLoanEmi')?.value) || 0,
+                        monthsRemaining: parseInt(document.getElementById('otherLoanMonths')?.value) || 0
+                    }
+                },
+                
+                // Goals
+                primaryGoal: document.getElementById('primaryGoal').value,
+                riskTolerance: document.getElementById('riskTolerance').value,
+                investmentExperience: document.getElementById('investmentExperience').value,
+                retirementAge: parseInt(document.getElementById('retirementAge').value) || 60
+            };
+            
+            // Calculate total debt EMIs
+            userProfile.totalDebtEmi = 0;
+            Object.values(userProfile.debts).forEach(debt => {
+                if (debt.active && debt.emi) {
+                    userProfile.totalDebtEmi += debt.emi;
+                } else if (debt.active && debt.minimum) {
+                    userProfile.totalDebtEmi += debt.minimum;
+                }
+            });
+            
+            // Calculate total fixed expenses
+            userProfile.totalFixedExpenses = Object.values(userProfile.fixedExpenses).reduce((a, b) => a + b, 0);
+            
+            // Collect dependents details
+            userProfile.dependentsDetails = [];
+            for (let i = 0; i < userProfile.dependents; i++) {
+                const typeEl = document.getElementById(`dependent${i}`);
+                const ageEl = document.getElementById(`dependentAge${i}`);
+                if (typeEl && ageEl) {
+                    userProfile.dependentsDetails.push({
+                        type: typeEl.value,
+                        age: parseInt(ageEl.value) || 0
+                    });
+                }
+            }
+            
+            return userProfile;
+        }
+
+        // Generate comprehensive financial analysis
+        function generateComprehensiveAnalysis() {
+            collectUserProfile();
+            
+            if (!userProfile.income || userProfile.income <= 0) {
+                alert('Please enter your monthly income to generate a financial plan.');
+                return;
+            }
+            
+            // Show loading state
+            showLoadingState();
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                // Calculate financial health score
+                const healthScore = calculateFinancialHealthScore();
+                
+                // Generate budget recommendations
+                const budget = generateIntelligentBudget();
+                
+                // Generate AI insights
+                const insights = generateAIInsights();
+                
+                // Generate financial projections
+                const projections = generateProjections();
+                
+                // Update UI
+                displayHealthScore(healthScore);
+                displayBudgetPlan(budget);
+                displayAIInsights(insights);
+                displayAnalysis(projections);
+                displayAdvisorRecommendations();
+                
+                // Show hidden sections
+                document.getElementById('healthScoreContainer').classList.remove('hidden');
+                document.getElementById('aiInsights').classList.remove('hidden');
+                
+                // Switch to budget tab
+                document.querySelector('.tab:nth-child(2)').click();
+                
+                hideLoadingState();
+            }, 1500);
+        }
+
+        // Calculate financial health score
+        function calculateFinancialHealthScore() {
+            let score = 50; // Base score
+            
+            // Income stability bonus
+            if (userProfile.jobStability === 'very-stable') score += 10;
+            else if (userProfile.jobStability === 'stable') score += 5;
+            
+            // Savings ratio
+            const savingsRatio = userProfile.currentSavings / userProfile.income;
+            if (savingsRatio >= 6) score += 15; // 6+ months emergency fund
+            else if (savingsRatio >= 3) score += 10;
+            else if (savingsRatio >= 1) score += 5;
+            
+            // Debt-to-income ratio (using EMI)
+            const debtRatio = userProfile.totalDebtEmi / userProfile.income;
+            if (debtRatio === 0) score += 15;
+            else if (debtRatio < 0.2) score += 10;
+            else if (debtRatio < 0.4) score += 5;
+            else if (debtRatio > 0.5) score -= 10;
+            
+            // Fixed expenses ratio
+            const fixedRatio = (userProfile.totalFixedExpenses + userProfile.totalDebtEmi) / userProfile.income;
+            if (fixedRatio < 0.5) score += 10;
+            else if (fixedRatio < 0.7) score += 5;
+            else if (fixedRatio > 0.8) score -= 10;
+            
+            // Investment presence
+            if (userProfile.currentInvestments > userProfile.income * 3) score += 10;
+            else if (userProfile.currentInvestments > 0) score += 5;
+            
+            // Age-appropriate retirement planning
+            const yearsToRetirement = userProfile.retirementAge - userProfile.age;
+            if (yearsToRetirement > 30 && userProfile.currentInvestments > 0) score += 5;
+            else if (yearsToRetirement < 20 && userProfile.currentInvestments < userProfile.income * 12) score -= 5;
+            
+            // Family planning consideration
+            if (userProfile.planningChildren && userProfile.childEducationFund === 0) score -= 5;
+            
+            // Ensure score is between 0 and 100
+            score = Math.max(0, Math.min(100, score));
+            
+            return {
+                score: score,
+                category: score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Needs Improvement',
+                description: getScoreDescription(score)
+            };
+        }
+
+        // Get score description
+        function getScoreDescription(score) {
+            if (score >= 80) return "Outstanding financial health! You're on track for financial success.";
+            if (score >= 60) return "Good financial position with room for optimization.";
+            if (score >= 40) return "Fair financial health. Focus on building emergency savings and reducing debt.";
+            return "Your finances need attention. Let's work on improving your financial stability.";
+        }
+
+        // Generate intelligent budget
+        function generateIntelligentBudget() {
+            const income = userProfile.income;
+            const totalDebtEmi = userProfile.totalDebtEmi;
+            const fixedExpenses = userProfile.totalFixedExpenses;
+            const disposableIncome = income - fixedExpenses - totalDebtEmi;
+            
+            // Base budget structure (percentages of disposable income)
+            let budget = {
+                essentials: {
+                    name: 'Essential Expenses',
+                    icon: '🏠',
+                    items: {
+                        groceries: { name: 'Groceries & Household', percent: 15, amount: 0 },
+                        healthcare: { name: 'Healthcare & Medicine', percent: 5, amount: 0 },
+                        childcare: { name: 'Childcare & Education', percent: 0, amount: 0 },
+                        parentSupport: { name: 'Parent Support', percent: 0, amount: 0 },
+                        petrol: { name: 'Petrol/Transport', percent: 8, amount: 0 }
+                    }
+                },
+                financial: {
+                    name: 'Financial Priorities',
+                    icon: '💎',
+                    items: {
+                        emergency: { name: 'Emergency Fund', percent: 15, amount: 0 },
+                        retirement: { name: 'Retirement Savings', percent: 12, amount: 0 },
+                        investments: { name: 'Investments', percent: 10, amount: 0 },
+                        childFuture: { name: "Child's Future Fund", percent: 0, amount: 0 }
+                    }
+                },
+                goals: {
+                    name: 'Goals & Growth',
+                    icon: '🎯',
+                    items: {
+                        shortTerm: { name: 'Short-term Goals', percent: 8, amount: 0 },
+                        education: { name: 'Self Education/Skills', percent: 3, amount: 0 },
+                        vacation: { name: 'Vacation Fund', percent: 5, amount: 0 }
+                    }
+                },
+                lifestyle: {
+                    name: 'Lifestyle & Discretionary',
+                    icon: '🎨',
+                    items: {
+                        entertainment: { name: 'Entertainment', percent: 5, amount: 0 },
+                        dining: { name: 'Dining Out', percent: 8, amount: 0 },
+                        shopping: { name: 'Shopping & Personal', percent: 7, amount: 0 },
+                        hobbies: { name: 'Hobbies', percent: 4, amount: 0 },
+                        misc: { name: 'Miscellaneous', percent: 5, amount: 0 }
+                    }
+                }
+            };
+            
+            // Adjust based on profile
+            
+            // Dependents adjustments
+            if (userProfile.dependents > 0) {
+                const childCount = userProfile.dependentsDetails.filter(d => d.type === 'child').length;
+                const parentCount = userProfile.dependentsDetails.filter(d => d.type === 'parent').length;
+                
+                if (childCount > 0) {
+                    budget.essentials.items.childcare.percent = childCount * 8;
+                    budget.financial.items.childFuture.percent = childCount * 5;
+                    budget.essentials.items.groceries.percent += childCount * 3;
+                }
+                
+                if (parentCount > 0) {
+                    budget.essentials.items.parentSupport.percent = parentCount * 5;
+                }
+            }
+            
+            // Family planning adjustments
+            if (userProfile.planningChildren && userProfile.childTimeline <= 2) {
+                budget.financial.items.childFuture.percent += 5;
+                budget.lifestyle.items.entertainment.percent -= 2;
+                budget.lifestyle.items.dining.percent -= 3;
+            }
+            
+            // Age-based adjustments
+            if (userProfile.age > 40) {
+                budget.financial.items.retirement.percent += 8;
+                budget.financial.items.emergency.percent += 5;
+                budget.lifestyle.items.entertainment.percent -= 3;
+            } else if (userProfile.age < 30) {
+                budget.financial.items.investments.percent += 5;
+                budget.goals.items.education.percent += 2;
+            }
+            
+            // Goal-based adjustments
+            if (userProfile.primaryGoal === 'debt-free') {
+                // If focused on debt, reduce lifestyle spending
+                budget.lifestyle.items.dining.percent = 3;
+                budget.lifestyle.items.entertainment.percent = 2;
+                budget.lifestyle.items.shopping.percent = 3;
+                budget.financial.items.emergency.percent += 10;
+            } else if (userProfile.primaryGoal === 'wealth') {
+                budget.financial.items.investments.percent += 15;
+                budget.lifestyle.items.shopping.percent -= 3;
+                budget.lifestyle.items.dining.percent -= 3;
+            } else if (userProfile.primaryGoal === 'retirement') {
+                budget.financial.items.retirement.percent += 10;
+                budget.lifestyle.items.misc.percent -= 2;
+            }
+            
+            // High fixed expenses adjustment
+            if (fixedExpenses > income * 0.4) {
+                // Reduce all discretionary spending
+                Object.keys(budget.lifestyle.items).forEach(key => {
+                    budget.lifestyle.items[key].percent *= 0.7;
+                });
+            }
+            
+            // Calculate actual amounts based on disposable income
+            Object.keys(budget).forEach(category => {
+                Object.keys(budget[category].items).forEach(item => {
+                    const percent = budget[category].items[item].percent;
+                    budget[category].items[item].amount = Math.round(disposableIncome * percent / 100);
+                    // Recalculate percent based on total income for display
+                    budget[category].items[item].percent = (budget[category].items[item].amount / income * 100);
+                });
+            });
+            
+            return budget;
+        }
+
+        // Generate AI insights
+        function generateAIInsights() {
+            const insights = [];
+            const income = userProfile.income;
+            const debtRatio = userProfile.totalDebtEmi / income;
+            const fixedRatio = (userProfile.totalFixedExpenses + userProfile.totalDebtEmi) / income;
+            const savingsRatio = userProfile.currentSavings / income;
+            
+            // Fixed expenses insight
+            if (fixedRatio > 0.7) {
+                insights.push({
+                    icon: '🏠',
+                    title: 'High Fixed Costs',
+                    text: `Your fixed expenses and debt payments are ${(fixedRatio * 100).toFixed(0)}% of income. Consider reducing rent or refinancing loans.`,
+                    priority: 'high'
+                });
+            }
+            
+            // Emergency fund insight
+            if (savingsRatio < 3) {
+                insights.push({
+                    icon: '🚨',
+                    title: 'Build Emergency Fund',
+                    text: `Your emergency fund covers only ${savingsRatio.toFixed(1)} months. Prioritize building to 3-6 months of expenses.`,
+                    priority: 'high'
+                });
+            }
+            
+            // Debt insight
+            if (debtRatio > 0.4) {
+                insights.push({
+                    icon: '💳',
+                    title: 'High Debt Load',
+                    text: `Your debt payments are ${(debtRatio * 100).toFixed(0)}% of income. Consider debt consolidation or the avalanche method.`,
+                    priority: 'high'
+                });
+            }
+            
+            // Family planning insight
+            if (userProfile.planningChildren && userProfile.childEducationFund === 0) {
+                const childCostLow = Math.round(income * 0.2);
+                const childCostHigh = Math.round(income * 0.3);
+                insights.push({
+                    icon: '👶',
+                    title: 'Plan for Future Family',
+                    text: `Start saving for child-related expenses now. Children typically cost ${formatCurrency(childCostLow)}-${formatCurrency(childCostHigh)} monthly.`,
+                    priority: 'medium'
+                });
+            }
+            
+            // Investment insight
+            if (userProfile.age < 40 && userProfile.currentInvestments < income * 2) {
+                insights.push({
+                    icon: '📈',
+                    title: 'Boost Investments',
+                    text: 'At your age, increasing investments can significantly impact long-term wealth through compound growth.',
+                    priority: 'medium'
+                });
+            }
+            
+            // Retirement insight
+            const yearsToRetirement = userProfile.retirementAge - userProfile.age;
+            const neededForRetirement = income * 12 * 20; // Rough estimate
+            const currentRetirementSavings = userProfile.currentInvestments;
+            
+            if (currentRetirementSavings < neededForRetirement * (1 - yearsToRetirement/40)) {
+                insights.push({
+                    icon: '🏖️',
+                    title: 'Retirement Planning',
+                    text: `You may need to increase retirement contributions to meet your goal of retiring at ${userProfile.retirementAge}.`,
+                    priority: 'medium'
+                });
+            }
+            
+            // Positive insights
+            if (savingsRatio >= 6) {
+                insights.push({
+                    icon: '🌟',
+                    title: 'Excellent Emergency Fund',
+                    text: 'Great job! Your emergency fund is well-stocked. Consider investing excess savings for growth.',
+                    priority: 'low'
+                });
+            }
+            
+            if (fixedRatio < 0.5) {
+                insights.push({
+                    icon: '✨',
+                    title: 'Low Fixed Costs',
+                    text: 'Your fixed expenses are well-controlled, giving you flexibility for savings and investments.',
+                    priority: 'low'
+                });
+            }
+            
+            return insights;
+        }
+
+        // Generate financial projections
+        function generateProjections() {
+            const currentAge = userProfile.age;
+            const retirementAge = userProfile.retirementAge;
+            const monthlyInvestment = userProfile.income * 0.15; // Assume 15% investment rate
+            const annualReturn = userProfile.riskTolerance === 'aggressive' ? 0.10 : 
+                               userProfile.riskTolerance === 'moderate' ? 0.07 : 0.05;
+            
+            const projections = {
+                retirement: calculateRetirementProjection(currentAge, retirementAge, monthlyInvestment, annualReturn),
+                netWorth: calculateNetWorthProjection(),
+                debtFreedom: calculateDebtFreedomDate()
+            };
+            
+            return projections;
+        }
+
+        // Calculate retirement projection
+        function calculateRetirementProjection(currentAge, retirementAge, monthlyInvestment, annualReturn) {
+            const years = retirementAge - currentAge;
+            const months = years * 12;
+            const monthlyReturn = annualReturn / 12;
+            
+            // Future value of existing investments
+            const currentInvestments = userProfile.currentInvestments;
+            const futureValueCurrent = currentInvestments * Math.pow(1 + annualReturn, years);
+            
+            // Future value of monthly investments
+            const futureValueMonthly = monthlyInvestment * ((Math.pow(1 + monthlyReturn, months) - 1) / monthlyReturn);
+            
+            const totalRetirement = futureValueCurrent + futureValueMonthly;
+            
+            return {
+                projectedAmount: Math.round(totalRetirement),
+                monthlyRetirement: Math.round(totalRetirement * 0.04 / 12), // 4% withdrawal rate
+                years: years
+            };
+        }
+
+        // Calculate net worth projection
+        function calculateNetWorthProjection() {
+            // Calculate total debt balance
+            let totalDebtBalance = 0;
+            Object.values(userProfile.debts).forEach(debt => {
+                if (debt.active) {
+                    totalDebtBalance += debt.balance || 0;
+                }
+            });
+            
+            const currentNetWorth = userProfile.currentSavings + userProfile.currentInvestments + 
+                                  userProfile.propertyValue + userProfile.otherAssets - totalDebtBalance;
+            
+            // Project future net worth with assumed growth
+            const annualSavingsRate = userProfile.income * 12 * 0.2; // Assume 20% savings rate
+            const investmentReturn = 1.07; // 7% annual return
+            
+            let fiveYearNetWorth = currentNetWorth;
+            let tenYearNetWorth = currentNetWorth;
+            
+            // Calculate 5-year projection
+            for (let i = 1; i <= 5; i++) {
+                fiveYearNetWorth = (fiveYearNetWorth + annualSavingsRate) * investmentReturn;
+            }
+            
+            // Calculate 10-year projection
+            tenYearNetWorth = fiveYearNetWorth;
+            for (let i = 6; i <= 10; i++) {
+                tenYearNetWorth = (tenYearNetWorth + annualSavingsRate) * investmentReturn;
+            }
+            
+            return {
+                current: currentNetWorth,
+                fiveYear: Math.round(fiveYearNetWorth),
+                tenYear: Math.round(tenYearNetWorth)
+            };
+        }
+
+        // Calculate debt freedom date
+        function calculateDebtFreedomDate() {
+            // Find the debt with the longest remaining term
+            let maxMonths = 0;
+            let totalDebtBalance = 0;
+            
+            Object.values(userProfile.debts).forEach(debt => {
+                if (debt.active) {
+                    if (debt.monthsRemaining > maxMonths) {
+                        maxMonths = debt.monthsRemaining;
+                    }
+                    totalDebtBalance += debt.balance || 0;
+                }
+            });
+            
+            if (maxMonths === 0 && totalDebtBalance === 0) {
+                return { months: 0, date: 'Debt Free!' };
+            }
+            
+            // For credit card debt without months specified
+            if (maxMonths === 0 && userProfile.debts.creditCard.active) {
+                const balance = userProfile.debts.creditCard.balance;
+                const payment = userProfile.debts.creditCard.minimum * 2; // Assume paying double minimum
+                maxMonths = Math.ceil(balance / payment);
+            }
+            
+            const date = new Date();
+            date.setMonth(date.getMonth() + maxMonths);
+            
+            return {
+                months: maxMonths,
+                date: maxMonths > 0 ? date.toLocaleDateString() : 'Debt Free!'
+            };
+        }
+
+        // Display functions
+        function displayHealthScore(scoreData) {
+            const scoreEl = document.getElementById('healthScore');
+            const progressEl = document.getElementById('scoreProgress');
+            const descEl = document.getElementById('scoreDescription');
+            
+            // Animate score
+            let currentScore = 0;
+            const targetScore = scoreData.score;
+            const increment = targetScore / 50;
+            
+            const scoreInterval = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= targetScore) {
+                    currentScore = targetScore;
+                    clearInterval(scoreInterval);
+                }
+                
+                scoreEl.textContent = Math.round(currentScore);
+                const offset = 565.48 - (565.48 * currentScore / 100);
+                progressEl.style.strokeDashoffset = offset;
+            }, 30);
+            
+            descEl.textContent = scoreData.description;
+        }
+
+        function displayBudgetPlan(budget) {
+            const container = document.getElementById('budgetContent');
+            budgetData = budget; // Store for later use
+            
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <p style="color: var(--secondary); font-size: 0.9rem;">
+                        💡 Suggested amounts are based on your profile. Adjust them to match your actual spending.
+                    </p>
+                </div>
+            `;
+            
+            Object.keys(budget).forEach(categoryKey => {
+                const category = budget[categoryKey];
+                const categoryTotal = Object.values(category.items).reduce((sum, item) => sum + item.amount, 0);
+                const categoryPercent = (categoryTotal / userProfile.income * 100).toFixed(1);
+                
+                html += `
+                    <div class="budget-category">
+                        <div class="category-header">
+                            <div style="display: flex; align-items: center; width: 100%;">
+                                <span class="category-icon">${category.icon}</span>
+                                <div style="flex: 1;">
+                                    <h3 style="margin: 0;">${category.name}</h3>
+                                    <p style="margin: 0; font-size: 0.9rem; color: var(--secondary);">
+                                        <span id="${categoryKey}-total">${formatCurrency(categoryTotal)}</span>
+                                        (<span id="${categoryKey}-percent">${categoryPercent}</span>% of income)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-fill" id="${categoryKey}-progress" style="width: ${categoryPercent}%"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                `;
+                
+                Object.keys(category.items).forEach(itemKey => {
+                    const item = category.items[itemKey];
+                    const itemId = `${categoryKey}-${itemKey}`;
+                    
+                    html += `
+                        <div style="border-bottom: 1px solid var(--light); padding: 15px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-weight: 500;">${item.name}</span>
+                                <span style="color: var(--secondary); font-size: 0.9rem;">
+                                    Suggested: ${formatCurrency(item.amount)} (${item.percent.toFixed(1)}%)
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 150px 80px; gap: 10px; align-items: center;">
+                                <div style="position: relative;">
+                                    <input type="number" 
+                                           id="${itemId}-input" 
+                                           class="budget-input"
+                                           value="${item.amount}"
+                                           min="0"
+                                           onchange="updateBudgetItem('${categoryKey}', '${itemKey}')"
+                                           style="width: 100%; padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px;">
+                                </div>
+                                <div style="text-align: center;">
+                                    <span id="${itemId}-percent" style="font-weight: 500;">
+                                        ${item.percent.toFixed(1)}% of income
+                                    </span>
+                                </div>
+                                <div id="${itemId}-status" style="text-align: center; font-size: 1.2rem;">
+                                    ${getStatusIcon(item.amount, item.amount, categoryKey)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            // Add summary section
+            html += `
+                <div class="card" style="margin-top: 30px; background: var(--gradient-1); color: white;">
+                    <h3 style="color: white; margin-bottom: 20px;">Budget Summary</h3>
+                    <div class="summary-grid" style="color: white;">
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Total Allocated</h4>
+                            <p id="totalAllocated" style="color: white;">${formatCurrency(0)}</p>
+                        </div>
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Remaining</h4>
+                            <p id="remainingBudget" style="color: white;">${formatCurrency(0)}</p>
+                        </div>
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Fixed Expenses</h4>
+                            <p style="color: white;">${formatCurrency(userProfile.totalFixedExpenses)}</p>
+                        </div>
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Debt Payments</h4>
+                            <p style="color: white;">${formatCurrency(userProfile.totalDebtEmi)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            updateBudgetSummary();
+        }
+
+        function displayAIInsights(insights) {
+            const container = document.getElementById('insightsContent');
+            let html = '';
+            
+            insights.forEach(insight => {
+                html += `
+                    <div class="insight-item">
+                        <span class="insight-icon">${insight.icon}</span>
+                        <div class="insight-text">
+                            <div class="insight-title">${insight.title}</div>
+                            <div>${insight.text}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function displayAnalysis(projections) {
+            const container = document.getElementById('analysisContent');
+            
+            let html = `
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Retirement Projection</h3>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--primary);">
+                            ${formatCurrency(projections.retirement.projectedAmount)}
+                        </p>
+                        <p>Projected retirement fund in ${projections.retirement.years} years</p>
+                        <p style="color: var(--secondary);">Monthly retirement income: ${formatCurrency(projections.retirement.monthlyRetirement)}</p>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Net Worth Growth</h3>
+                        <p>Current: <strong>${formatCurrency(projections.netWorth.current)}</strong></p>
+                        <p>5 Years: <strong>${formatCurrency(projections.netWorth.fiveYear)}</strong></p>
+                        <p>10 Years: <strong>${formatCurrency(projections.netWorth.tenYear)}</strong></p>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Debt Freedom Timeline</h3>
+                        <p style="font-size: 1.5rem; font-weight: 700; color: var(--success);">
+                            ${projections.debtFreedom.date}
+                        </p>
+                        <p>${projections.debtFreedom.months > 0 ? `${projections.debtFreedom.months} months to debt freedom` : 'Congratulations on being debt-free!'}</p>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function displayAdvisorRecommendations() {
+            const container = document.getElementById('advisorContent');
+            
+            // Calculate key metrics
+            const emergencyTarget = userProfile.income * 3;
+            const monthlyInvestmentTarget = userProfile.income * 0.15;
+            const fixedRatio = (userProfile.totalFixedExpenses + userProfile.totalDebtEmi) / userProfile.income;
+            
+            let html = `
+                <div style="display: grid; gap: 20px;">
+                    <div class="ai-insights" style="background: var(--gradient-2);">
+                        <h3>🎯 Personalized Action Plan</h3>
+                        <ol style="margin-top: 20px; padding-left: 20px;">
+            `;
+            
+            // Dynamic action items based on profile
+            if (userProfile.currentSavings < emergencyTarget) {
+                html += `<li style="margin-bottom: 10px;">Build emergency fund to ${formatCurrency(emergencyTarget)} (3 months expenses)</li>`;
+            }
+            
+            if (fixedRatio > 0.7) {
+                html += `<li style="margin-bottom: 10px;">Reduce fixed expenses - currently ${(fixedRatio * 100).toFixed(0)}% of income</li>`;
+            }
+            
+            if (userProfile.totalDebtEmi > 0) {
+                html += `<li style="margin-bottom: 10px;">Pay off high-interest debt using avalanche method</li>`;
+            }
+            
+            html += `
+                            <li style="margin-bottom: 10px;">Increase retirement contributions by 5% annually</li>
+                            <li style="margin-bottom: 10px;">Start investing ${formatCurrency(monthlyInvestmentTarget)} monthly</li>
+                            <li style="margin-bottom: 10px;">Review and optimize insurance coverage</li>
+            `;
+            
+            if (userProfile.planningChildren) {
+                html += `<li style="margin-bottom: 10px;">Start child education fund with ${formatCurrency(userProfile.income * 0.05)} monthly</li>`;
+            }
+            
+            html += `
+                        </ol>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>📚 Recommended Resources</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 10px 0; border-bottom: 1px solid var(--light);">
+                                📖 "The Intelligent Investor" - For investment fundamentals
+                            </li>
+                            <li style="padding: 10px 0; border-bottom: 1px solid var(--light);">
+                                🎓 Online Course: Personal Finance Masterclass
+                            </li>
+                            <li style="padding: 10px 0; border-bottom: 1px solid var(--light);">
+                                📱 Apps: Mint (budgeting), Personal Capital (investing)
+                            </li>
+                            <li style="padding: 10px 0;">
+                                🏦 Consider: High-yield savings account for emergency fund
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button class="btn btn-gradient" onclick="exportFinancialPlan()">
+                            📄 Export Financial Plan (CSV)
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.print()" style="margin-left: 10px;">
+                            🖨️ Print Report
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Format currency without parameter
+        function formatCurrency(amount, includeSymbol = true) {
+            const currency = userProfile.currency || 'USD';
+            const symbol = currencySymbols[currency];
+            const formatted = amount.toLocaleString('en-US', { 
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0 
+            });
+            return includeSymbol ? `${symbol}${formatted}` : formatted;
+        }
+
+        function showLoadingState() {
+            // Add loading states to all content areas
+            const areas = ['budgetContent', 'analysisContent', 'advisorContent'];
+            areas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading"></div><p>AI is analyzing your financial profile...</p></div>';
+                }
+            });
+        }
+
+        function hideLoadingState() {
+            // Loading states are replaced by actual content
+        }
+
+        function exportFinancialPlan() {
+            collectUserProfile();
+            
+            // Prepare CSV data
+            let csvContent = "AI Financial Advisor Report\n";
+            csvContent += `Generated Date: ${new Date().toLocaleDateString()}\n\n`;
+            
+            // Profile Section
+            csvContent += "PERSONAL PROFILE\n";
+            csvContent += `Age,${userProfile.age}\n`;
+            csvContent += `Marital Status,${userProfile.maritalStatus}\n`;
+            csvContent += `Dependents,${userProfile.dependents}\n`;
+            csvContent += `Monthly Income,${formatCurrency(userProfile.income)}\n`;
+            csvContent += `Currency,${userProfile.currency}\n\n`;
+            
+            // Assets Section
+            csvContent += "ASSETS\n";
+            csvContent += `Current Savings,${formatCurrency(userProfile.currentSavings)}\n`;
+            csvContent += `Current Investments,${formatCurrency(userProfile.currentInvestments)}\n`;
+            csvContent += `Property Value,${formatCurrency(userProfile.propertyValue)}\n`;
+            csvContent += `Other Assets,${formatCurrency(userProfile.otherAssets)}\n`;
+            csvContent += `Total Assets,${formatCurrency(userProfile.currentSavings + userProfile.currentInvestments + userProfile.propertyValue + userProfile.otherAssets)}\n\n`;
+            
+            // Fixed Expenses Section
+            csvContent += "FIXED MONTHLY EXPENSES\n";
+            Object.entries(userProfile.fixedExpenses).forEach(([key, value]) => {
+                csvContent += `${key.charAt(0).toUpperCase() + key.slice(1)},${formatCurrency(value)}\n`;
+            });
+            csvContent += `Total Fixed Expenses,${formatCurrency(userProfile.totalFixedExpenses)}\n\n`;
+            
+            // Debts Section
+            csvContent += "DEBTS & OBLIGATIONS\n";
+            csvContent += "Type,EMI,Months Remaining,Outstanding Balance\n";
+            Object.entries(userProfile.debts).forEach(([key, debt]) => {
+                if (debt.active) {
+                    const name = key.replace(/([A-Z])/g, ' $1').trim();
+                    csvContent += `${name},${formatCurrency(debt.emi || debt.minimum || 0)},${debt.monthsRemaining || 'N/A'},${formatCurrency(debt.balance || 0)}\n`;
+                }
+            });
+            csvContent += `Total Monthly Debt Payments,${formatCurrency(userProfile.totalDebtEmi)}\n\n`;
+            
+            // Budget Plan Section
+            csvContent += "RECOMMENDED BUDGET PLAN\n";
+            csvContent += "Category,Subcategory,Suggested Amount,Your Amount,% of Income\n";
+            
+            if (budgetData && Object.keys(budgetData).length > 0) {
+                Object.entries(budgetData).forEach(([catKey, category]) => {
+                    Object.entries(category.items).forEach(([itemKey, item]) => {
+                        const inputEl = document.getElementById(`${catKey}-${itemKey}-input`);
+                        const actualAmount = inputEl ? parseFloat(inputEl.value) || 0 : item.amount;
+                        const percent = (actualAmount / userProfile.income * 100).toFixed(1);
+                        csvContent += `${category.name},${item.name},${formatCurrency(item.amount)},${formatCurrency(actualAmount)},${percent}%\n`;
+                    });
+                });
+            }
+            
+            // Financial Health Score
+            const healthScore = calculateFinancialHealthScore();
+            csvContent += `\nFINANCIAL HEALTH SCORE\n`;
+            csvContent += `Score,${healthScore.score}/100\n`;
+            csvContent += `Category,${healthScore.category}\n`;
+            csvContent += `Assessment,"${healthScore.description}"\n\n`;
+            
+            // Projections
+            const projections = generateProjections();
+            csvContent += "FINANCIAL PROJECTIONS\n";
+            csvContent += `Retirement Fund (at age ${userProfile.retirementAge}),${formatCurrency(projections.retirement.projectedAmount)}\n`;
+            csvContent += `Monthly Retirement Income,${formatCurrency(projections.retirement.monthlyRetirement)}\n`;
+            csvContent += `Current Net Worth,${formatCurrency(projections.netWorth.current)}\n`;
+            csvContent += `5-Year Net Worth Projection,${formatCurrency(projections.netWorth.fiveYear)}\n`;
+            csvContent += `10-Year Net Worth Projection,${formatCurrency(projections.netWorth.tenYear)}\n`;
+            csvContent += `Debt Freedom Date,${projections.debtFreedom.date}\n`;
+            
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `financial-plan-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Update budget item
+        function updateBudgetItem(categoryKey, itemKey) {
+            const inputId = `${categoryKey}-${itemKey}-input`;
+            const percentId = `${categoryKey}-${itemKey}-percent`;
+            const statusId = `${categoryKey}-${itemKey}-status`;
+            
+            const inputEl = document.getElementById(inputId);
+            const amount = parseFloat(inputEl.value) || 0;
+            const percent = (amount / userProfile.income * 100).toFixed(1);
+            const suggestedAmount = budgetData[categoryKey].items[itemKey].amount;
+            
+            // Update percentage display
+            document.getElementById(percentId).textContent = `${percent}% of income`;
+            
+            // Update status icon
+            const statusEl = document.getElementById(statusId);
+            statusEl.innerHTML = getStatusIcon(amount, suggestedAmount, categoryKey);
+            
+            // Update category totals
+            updateCategoryTotal(categoryKey);
+            
+            // Update overall summary
+            updateBudgetSummary();
+        }
+        
+        // Get status icon based on amount
+        function getStatusIcon(actual, suggested, categoryKey) {
+            const ratio = actual / suggested;
+            const isExpense = categoryKey !== 'financial' && categoryKey !== 'goals';
+            
+            if (isExpense) {
+                if (ratio > 1.3) return '⚠️'; // Too high
+                if (ratio < 0.7) return '🌟'; // Great savings
+                return '✅'; // Good
+            } else {
+                if (ratio < 0.5) return '⚠️'; // Too low for savings/investments
+                if (ratio > 1.5) return '🌟'; // Excellent savings
+                return '✅'; // Good
+            }
+        }
+        
+        // Update category total
+        function updateCategoryTotal(categoryKey) {
+            let total = 0;
+            const category = budgetData[categoryKey];
+            
+            Object.keys(category.items).forEach(itemKey => {
+                const inputEl = document.getElementById(`${categoryKey}-${itemKey}-input`);
+                total += parseFloat(inputEl?.value) || 0;
+            });
+            
+            const percent = (total / userProfile.income * 100).toFixed(1);
+            
+            document.getElementById(`${categoryKey}-total`).textContent = formatCurrency(total);
+            document.getElementById(`${categoryKey}-percent`).textContent = percent;
+            document.getElementById(`${categoryKey}-progress`).style.width = `${percent}%`;
+        }
+        
+        // Update budget summary
+        function updateBudgetSummary() {
+            let totalAllocated = 0;
+            
+            // Calculate total from all budget inputs
+            document.querySelectorAll('.budget-input').forEach(input => {
+                totalAllocated += parseFloat(input.value) || 0;
+            });
+            
+            // Add fixed expenses and debt payments
+            totalAllocated += userProfile.totalFixedExpenses + userProfile.totalDebtEmi;
+            
+            const remaining = userProfile.income - totalAllocated;
+            
+            document.getElementById('totalAllocated').textContent = formatCurrency(totalAllocated);
+            document.getElementById('remainingBudget').textContent = formatCurrency(remaining);
+            
+            // Color code remaining budget
+            const remainingEl = document.getElementById('remainingBudget').parentElement;
+            if (remaining < 0) {
+                remainingEl.style.background = 'rgba(239, 68, 68, 0.2)';
+            } else if (remaining < userProfile.income * 0.05) {
+                remainingEl.style.background = 'rgba(245, 158, 11, 0.2)';
+            } else {
+                remainingEl.style.background = 'rgba(255,255,255,0.1)';
+            }
+        }
+    </script>
+</body>
+</html>
