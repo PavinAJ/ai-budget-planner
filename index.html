@@ -347,6 +347,20 @@
             opacity: 0.2;
         }
 
+        .ai-insights h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .ai-insights ol,
+        .ai-insights ul {
+            margin: 0;
+        }
+
+        .ai-insights li {
+            color: white;
+        }
+
         .insight-item {
             display: flex;
             align-items: flex-start;
@@ -409,10 +423,130 @@
             color: white;
         }
 
+        /* Goal Content Styles */
+        .goal-content {
+            display: none;
+        }
+
+        .goal-content.active {
+            display: block;
+        }
+
+        /* Achievement Styles */
+        .achievement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 15px;
+            background: var(--gradient-3);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 5px;
+            animation: badgeAppear 0.5s ease;
+        }
+
+        @keyframes badgeAppear {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .tracking-category {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .tracking-progress {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .tracking-bar {
+            flex: 1;
+            height: 20px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tracking-bar-fill {
+            height: 100%;
+            background: var(--gradient-3);
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .tracking-bar-budget {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--danger);
+            z-index: 2;
+        }
+
+        /* Asset Allocation Styles */
+        .asset-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .asset-bar {
+            width: 200px;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .asset-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
         /* Charts Container */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin: 20px 0;
         }
@@ -422,6 +556,16 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .chart-container h4 {
+            margin: 0 0 15px 0;
+            color: var(--dark);
+        }
+
+        .chart-container p {
+            margin: 5px 0;
         }
 
         /* Summary Grid */
@@ -643,6 +787,16 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -679,7 +833,10 @@
         <div class="tabs">
             <button class="tab active" onclick="switchTab('profile')">Profile Setup</button>
             <button class="tab" onclick="switchTab('budget')">Budget Planner</button>
-            <button class="tab" onclick="switchTab('analysis')">Analysis & Reports</button>
+            <button class="tab" onclick="switchTab('tracking')">Monthly Tracking</button>
+            <button class="tab" onclick="switchTab('goals')">Goal Calculators</button>
+            <button class="tab" onclick="switchTab('investments')">Investments</button>
+            <button class="tab" onclick="switchTab('analysis')">Analysis</button>
             <button class="tab" onclick="switchTab('advisor')">AI Advisor</button>
         </div>
 
@@ -1027,11 +1184,210 @@
                         <span>💰</span>
                         Smart Budget Allocation
                     </h2>
+                    <div>
+                        <select id="budgetTemplate" onchange="loadBudgetTemplate()" style="padding: 8px 15px; border-radius: 8px; border: 2px solid var(--border);">
+                            <option value="custom">Custom Budget</option>
+                            <option value="conservative">Conservative (High Savings)</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="aggressive">Aggressive (High Investment)</option>
+                            <option value="debt-focused">Debt Elimination</option>
+                            <option value="family">Family-Oriented</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="saveBudgetTemplate()" style="margin-left: 10px;">
+                            💾 Save Template
+                        </button>
+                    </div>
                 </div>
                 <div id="budgetContent">
                     <p style="text-align: center; color: var(--secondary); padding: 40px;">
                         Complete your profile first to generate a personalized budget plan
                     </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Tracking Tab -->
+        <div class="tab-content" id="tracking-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>📊</span>
+                        Monthly Expense Tracking
+                    </h2>
+                    <div>
+                        <select id="trackingMonth" onchange="loadMonthData()" style="padding: 8px 15px; border-radius: 8px; border: 2px solid var(--border);">
+                            <option value="current">Current Month</option>
+                            <option value="last1">Last Month</option>
+                            <option value="last2">2 Months Ago</option>
+                            <option value="last3">3 Months Ago</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="trackingContent">
+                    <div class="alert alert-info" style="background: rgba(6, 182, 212, 0.1); color: var(--info); border: 1px solid rgba(6, 182, 212, 0.3); margin-bottom: 20px;">
+                        <span>💡</span>
+                        Track your actual spending against your budget to identify areas for improvement.
+                    </div>
+                    <div id="trackingCategories"></div>
+                    <div class="card" style="margin-top: 20px; background: var(--gradient-4); color: white;">
+                        <h3 style="color: white;">Monthly Summary</h3>
+                        <div class="summary-grid" style="margin-top: 20px;">
+                            <div class="summary-item" style="background: rgba(255,255,255,0.2);">
+                                <h4 style="color: white;">Budget</h4>
+                                <p id="trackingBudget" style="color: white;">-</p>
+                            </div>
+                            <div class="summary-item" style="background: rgba(255,255,255,0.2);">
+                                <h4 style="color: white;">Actual</h4>
+                                <p id="trackingActual" style="color: white;">-</p>
+                            </div>
+                            <div class="summary-item" style="background: rgba(255,255,255,0.2);">
+                                <h4 style="color: white;">Variance</h4>
+                                <p id="trackingVariance" style="color: white;">-</p>
+                            </div>
+                            <div class="summary-item" style="background: rgba(255,255,255,0.2);">
+                                <h4 style="color: white;">Savings Rate</h4>
+                                <p id="trackingSavings" style="color: white;">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goal Calculators Tab -->
+        <div class="tab-content" id="goals-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>🎯</span>
+                        Financial Goal Calculators
+                    </h2>
+                </div>
+                <div class="tabs" style="border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+                    <button class="tab active" onclick="switchGoalTab('home')">Home Purchase</button>
+                    <button class="tab" onclick="switchGoalTab('retirement')">Retirement</button>
+                    <button class="tab" onclick="switchGoalTab('education')">Education</button>
+                </div>
+                
+                <!-- Home Purchase Calculator -->
+                <div class="goal-content active" id="home-goal">
+                    <h3>🏠 Home Purchase Calculator</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="homePrice">Target Home Price</label>
+                            <input type="number" id="homePrice" value="500000" onchange="calculateHomePurchase()">
+                        </div>
+                        <div class="form-group">
+                            <label for="downPaymentPercent">Down Payment %</label>
+                            <input type="number" id="downPaymentPercent" value="20" min="5" max="100" onchange="calculateHomePurchase()">
+                        </div>
+                        <div class="form-group">
+                            <label for="homeLoanRate">Loan Interest Rate %</label>
+                            <input type="number" id="homeLoanRate" value="7" step="0.1" onchange="calculateHomePurchase()">
+                        </div>
+                        <div class="form-group">
+                            <label for="homeLoanTerm">Loan Term (Years)</label>
+                            <input type="number" id="homeLoanTerm" value="30" min="5" max="30" onchange="calculateHomePurchase()">
+                        </div>
+                    </div>
+                    <div id="homeCalculatorResult" style="margin-top: 20px;"></div>
+                </div>
+                
+                <!-- Retirement Calculator -->
+                <div class="goal-content" id="retirement-goal" style="display: none;">
+                    <h3>🏖️ Retirement Planning Calculator</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="retireCurrentAge">Current Age</label>
+                            <input type="number" id="retireCurrentAge" value="30" onchange="calculateRetirement()">
+                        </div>
+                        <div class="form-group">
+                            <label for="retireTargetAge">Retirement Age</label>
+                            <input type="number" id="retireTargetAge" value="60" onchange="calculateRetirement()">
+                        </div>
+                        <div class="form-group">
+                            <label for="retireMonthlyExpense">Expected Monthly Expenses</label>
+                            <input type="number" id="retireMonthlyExpense" value="5000" onchange="calculateRetirement()">
+                        </div>
+                        <div class="form-group">
+                            <label for="retireInflation">Expected Inflation %</label>
+                            <input type="number" id="retireInflation" value="6" step="0.1" onchange="calculateRetirement()">
+                        </div>
+                        <div class="form-group">
+                            <label for="retireReturn">Expected Return %</label>
+                            <input type="number" id="retireReturn" value="10" step="0.1" onchange="calculateRetirement()">
+                        </div>
+                        <div class="form-group">
+                            <label for="retireLifeExpectancy">Life Expectancy</label>
+                            <input type="number" id="retireLifeExpectancy" value="85" onchange="calculateRetirement()">
+                        </div>
+                    </div>
+                    <div id="retirementCalculatorResult" style="margin-top: 20px;"></div>
+                </div>
+                
+                <!-- Education Calculator -->
+                <div class="goal-content" id="education-goal" style="display: none;">
+                    <h3>🎓 Education Cost Calculator</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="eduChildAge">Child's Current Age</label>
+                            <input type="number" id="eduChildAge" value="5" onchange="calculateEducation()">
+                        </div>
+                        <div class="form-group">
+                            <label for="eduStartAge">College Start Age</label>
+                            <input type="number" id="eduStartAge" value="18" onchange="calculateEducation()">
+                        </div>
+                        <div class="form-group">
+                            <label for="eduCurrentCost">Current Annual Cost</label>
+                            <input type="number" id="eduCurrentCost" value="50000" onchange="calculateEducation()">
+                        </div>
+                        <div class="form-group">
+                            <label for="eduInflation">Education Inflation %</label>
+                            <input type="number" id="eduInflation" value="8" step="0.1" onchange="calculateEducation()">
+                        </div>
+                        <div class="form-group">
+                            <label for="eduYears">Years of Education</label>
+                            <input type="number" id="eduYears" value="4" onchange="calculateEducation()">
+                        </div>
+                        <div class="form-group">
+                            <label for="eduReturn">Expected Return %</label>
+                            <input type="number" id="eduReturn" value="10" step="0.1" onchange="calculateEducation()">
+                        </div>
+                    </div>
+                    <div id="educationCalculatorResult" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investments Tab -->
+        <div class="tab-content" id="investments-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>📈</span>
+                        Investment Recommendations
+                    </h2>
+                </div>
+                <div id="investmentContent">
+                    <div class="alert alert-info" style="background: rgba(6, 182, 212, 0.1); color: var(--info); border: 1px solid rgba(6, 182, 212, 0.3); margin-bottom: 20px;">
+                        <span>🤖</span>
+                        AI-powered investment recommendations based on your risk profile and goals.
+                    </div>
+                    
+                    <!-- Asset Allocation -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <h3>💼 Recommended Asset Allocation</h3>
+                        <div id="assetAllocation"></div>
+                        <button class="btn btn-primary" onclick="rebalancePortfolio()" style="margin-top: 15px;">
+                            ⚖️ Check Rebalancing Needs
+                        </button>
+                    </div>
+                    
+                    <!-- Investment Options -->
+                    <div class="card">
+                        <h3>🎯 Suggested Investment Options</h3>
+                        <div id="investmentOptions"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1076,6 +1432,60 @@
         let userProfile = {};
         let budgetData = {};
         let financialAnalysis = {};
+        let monthlyTracking = {};
+        let achievements = [];
+        let budgetTemplates = {
+            conservative: {
+                name: 'Conservative',
+                description: 'High savings, low risk',
+                adjustments: {
+                    emergency: 1.5,
+                    retirement: 1.3,
+                    investments: 0.7,
+                    lifestyle: 0.6
+                }
+            },
+            balanced: {
+                name: 'Balanced',
+                description: 'Balanced approach',
+                adjustments: {
+                    emergency: 1.0,
+                    retirement: 1.0,
+                    investments: 1.0,
+                    lifestyle: 1.0
+                }
+            },
+            aggressive: {
+                name: 'Aggressive',
+                description: 'High growth focus',
+                adjustments: {
+                    emergency: 0.8,
+                    retirement: 1.2,
+                    investments: 1.5,
+                    lifestyle: 0.8
+                }
+            },
+            'debt-focused': {
+                name: 'Debt Elimination',
+                description: 'Prioritize debt payoff',
+                adjustments: {
+                    emergency: 0.5,
+                    retirement: 0.5,
+                    investments: 0.3,
+                    lifestyle: 0.5
+                }
+            },
+            family: {
+                name: 'Family-Oriented',
+                description: 'Family needs priority',
+                adjustments: {
+                    emergency: 1.2,
+                    retirement: 0.8,
+                    investments: 0.7,
+                    lifestyle: 1.2
+                }
+            }
+        };
         
         // Currency formatting
         const currencySymbols = {
@@ -1100,6 +1510,17 @@
             // Initialize default states
             handleMaritalStatusChange();
             updateDependentsDetails();
+            
+            // Initialize calculators with default values
+            if (document.getElementById('homePrice')) {
+                calculateHomePurchase();
+            }
+            if (document.getElementById('retireCurrentAge')) {
+                calculateRetirement();
+            }
+            if (document.getElementById('eduChildAge')) {
+                calculateEducation();
+            }
         }
 
         // Tab switching
@@ -1115,6 +1536,13 @@
                 content.classList.remove('active');
             });
             document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Initialize specific tab content if needed
+            if (tabName === 'tracking' && Object.keys(budgetData).length > 0) {
+                initializeTracking();
+            } else if (tabName === 'investments' && userProfile.income) {
+                generateInvestmentRecommendations();
+            }
         }
 
         // Toggle switches
@@ -1915,9 +2343,126 @@
                         <p>${projections.debtFreedom.months > 0 ? `${projections.debtFreedom.months} months to debt freedom` : 'Congratulations on being debt-free!'}</p>
                     </div>
                 </div>
+                
+                <!-- Monthly Reports Section -->
+                <div class="card" style="margin-top: 30px;">
+                    <h3>📈 Monthly Financial Reports</h3>
+                    <div class="tabs" style="border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+                        <button class="tab active" onclick="showMonthlyReport('summary')">Summary</button>
+                        <button class="tab" onclick="showMonthlyReport('trends')">Trends</button>
+                        <button class="tab" onclick="showMonthlyReport('insights')">Insights</button>
+                    </div>
+                    <div id="monthlyReportContent">
+                        ${generateMonthlySummaryReport()}
+                    </div>
+                </div>
             `;
             
             container.innerHTML = html;
+        }
+
+        function generateMonthlySummaryReport() {
+            const income = userProfile.income;
+            const expenses = userProfile.totalFixedExpenses + userProfile.totalDebtEmi;
+            const savings = income - expenses;
+            const savingsRate = (savings / income * 100).toFixed(1);
+            
+            return `
+                <div class="summary-grid">
+                    <div class="summary-item" style="background: var(--light);">
+                        <h4>Monthly Income</h4>
+                        <p>${formatCurrency(income)}</p>
+                    </div>
+                    <div class="summary-item" style="background: var(--light);">
+                        <h4>Fixed Expenses</h4>
+                        <p>${formatCurrency(expenses)}</p>
+                    </div>
+                    <div class="summary-item" style="background: var(--light);">
+                        <h4>Potential Savings</h4>
+                        <p>${formatCurrency(savings)}</p>
+                    </div>
+                    <div class="summary-item" style="background: var(--light);">
+                        <h4>Savings Rate</h4>
+                        <p>${savingsRate}%</p>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="generateDetailedReport()">
+                        📄 Generate Detailed Report
+                    </button>
+                </div>
+            `;
+        }
+
+        function showMonthlyReport(type) {
+            event.target.parentElement.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const content = document.getElementById('monthlyReportContent');
+            
+            if (type === 'summary') {
+                content.innerHTML = generateMonthlySummaryReport();
+            } else if (type === 'trends') {
+                content.innerHTML = `
+                    <div class="alert alert-info">
+                        <span>📊</span>
+                        Track your expenses for at least 3 months to see meaningful trends.
+                    </div>
+                    <p>Spending trends will appear here once you have sufficient tracking data.</p>
+                `;
+            } else if (type === 'insights') {
+                const insights = generateMonthlyInsights();
+                content.innerHTML = insights;
+            }
+        }
+
+        function generateMonthlyInsights() {
+            let html = '<div style="display: grid; gap: 15px;">';
+            
+            // Generate contextual insights
+            if (userProfile.totalFixedExpenses > userProfile.income * 0.5) {
+                html += `
+                    <div class="insight-item" style="background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--danger);">
+                        <span class="insight-icon">⚠️</span>
+                        <div class="insight-text">
+                            <div class="insight-title">High Fixed Costs Alert</div>
+                            <div>Your fixed expenses are ${((userProfile.totalFixedExpenses / userProfile.income) * 100).toFixed(0)}% of income. Consider reducing rent or other fixed costs.</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (userProfile.currentSavings < userProfile.income) {
+                html += `
+                    <div class="insight-item" style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--warning);">
+                        <span class="insight-icon">💰</span>
+                        <div class="insight-text">
+                            <div class="insight-title">Emergency Fund Gap</div>
+                            <div>You need ${formatCurrency(userProfile.income * 3 - userProfile.currentSavings)} more to reach 3 months of emergency savings.</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div class="insight-item" style="background: rgba(34, 197, 94, 0.1); border-left: 3px solid var(--success);">
+                    <span class="insight-icon">💡</span>
+                    <div class="insight-text">
+                        <div class="insight-title">Optimization Opportunity</div>
+                        <div>Based on your profile, you could potentially save an additional ${formatCurrency(userProfile.income * 0.05)} by optimizing discretionary spending.</div>
+                    </div>
+                </div>
+            `;
+            
+            html += '</div>';
+            return html;
+        }
+
+        function generateDetailedReport() {
+            // This would generate a comprehensive PDF report in a real application
+            alert('Detailed monthly report will be generated. In a full implementation, this would create a downloadable PDF with charts and detailed analysis.');
         }
 
         function displayAdvisorRecommendations() {
@@ -1928,8 +2473,17 @@
             const monthlyInvestmentTarget = userProfile.income * 0.15;
             const fixedRatio = (userProfile.totalFixedExpenses + userProfile.totalDebtEmi) / userProfile.income;
             
+            // Get monthly financial tip
+            const monthlyTip = getMonthlyFinancialTip();
+            
             let html = `
                 <div style="display: grid; gap: 20px;">
+                    <!-- Monthly Financial Tip -->
+                    <div class="ai-insights" style="background: var(--gradient-3);">
+                        <h3>💡 Tip of the Month</h3>
+                        <p style="margin-top: 15px; font-size: 1.1rem;">${monthlyTip}</p>
+                    </div>
+                    
                     <div class="ai-insights" style="background: var(--gradient-2);">
                         <h3>🎯 Personalized Action Plan</h3>
                         <ol style="margin-top: 20px; padding-left: 20px;">
@@ -1962,6 +2516,14 @@
                         </ol>
                     </div>
                     
+                    <!-- Achievement Progress -->
+                    <div class="card">
+                        <h3>🏆 Your Financial Achievements</h3>
+                        <div style="margin-top: 15px;">
+                            ${displayAchievements()}
+                        </div>
+                    </div>
+                    
                     <div class="card">
                         <h3>📚 Recommended Resources</h3>
                         <ul style="list-style: none; padding: 0;">
@@ -1980,6 +2542,29 @@
                         </ul>
                     </div>
                     
+                    <!-- Automated Insights Setup -->
+                    <div class="card">
+                        <h3>🔔 Automated Financial Insights</h3>
+                        <p style="margin-bottom: 15px;">Get personalized financial tips and progress updates</p>
+                        <div class="form-group">
+                            <label>Email for Monthly Insights</label>
+                            <input type="email" id="insightsEmail" placeholder="your@email.com" style="margin-bottom: 10px;">
+                            <button class="btn btn-primary" onclick="setupAutomatedInsights()">
+                                Enable Monthly Insights
+                            </button>
+                        </div>
+                        <div style="margin-top: 15px; padding: 15px; background: var(--light); border-radius: 8px;">
+                            <p style="font-weight: 600; margin-bottom: 10px;">You'll receive:</p>
+                            <ul style="margin-left: 20px;">
+                                <li>Monthly budget vs actual analysis</li>
+                                <li>Personalized savings tips</li>
+                                <li>Investment rebalancing reminders</li>
+                                <li>Achievement notifications</li>
+                                <li>Market insights based on your risk profile</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
                     <div style="text-align: center;">
                         <button class="btn btn-gradient" onclick="exportFinancialPlan()">
                             📄 Export Financial Plan (CSV)
@@ -1994,9 +2579,81 @@
             container.innerHTML = html;
         }
 
+        function getMonthlyFinancialTip() {
+            const tips = [
+                "Pay yourself first: Automate savings transfers right after your paycheck arrives.",
+                "The 50/30/20 rule: 50% needs, 30% wants, 20% savings and debt repayment.",
+                "Review subscriptions monthly - cancel unused services to free up cash.",
+                "Negotiate bills annually - insurance, phone, and internet rates often have flexibility.",
+                "Track spending for one week to identify your biggest money leaks.",
+                "Use the 24-hour rule for non-essential purchases to avoid impulse buying.",
+                "Increase retirement contributions by 1% each year - you won't notice the difference.",
+                "Build multiple income streams for financial security and faster wealth building.",
+                "Invest in yourself - skills and education provide the best ROI.",
+                "Automate your finances to reduce decision fatigue and ensure consistency."
+            ];
+            
+            // Return a tip based on the current month
+            const month = new Date().getMonth();
+            return tips[month % tips.length];
+        }
+
+        function displayAchievements() {
+            if (achievements.length === 0) {
+                return `
+                    <p style="color: var(--secondary);">Complete financial milestones to earn achievements!</p>
+                    <div style="margin-top: 10px;">
+                        <div class="achievement-badge" style="position: static; opacity: 0.5;">🎯 Future: Budget Master</div>
+                        <div class="achievement-badge" style="position: static; opacity: 0.5;">🛡️ Future: Emergency Fund Hero</div>
+                        <div class="achievement-badge" style="position: static; opacity: 0.5;">💎 Future: Investment Guru</div>
+                    </div>
+                `;
+            }
+            
+            let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px;">';
+            achievements.forEach(achievementId => {
+                const achievement = getAchievementDetails(achievementId);
+                html += `<div class="achievement-badge" style="position: static;">${achievement.name}</div>`;
+            });
+            html += '</div>';
+            
+            return html;
+        }
+
+        function getAchievementDetails(id) {
+            const achievementMap = {
+                'emergency-fund': { name: '🛡️ Emergency Fund Hero' },
+                'budget-master': { name: '📊 Budget Master' },
+                'debt-free': { name: '🎉 Debt Free Champion' },
+                'investment-starter': { name: '💎 Investment Beginner' },
+                'savings-streak': { name: '🔥 Savings Streak' }
+            };
+            
+            return achievementMap[id] || { name: '🏆 Achievement' };
+        }
+
+        function setupAutomatedInsights() {
+            const email = document.getElementById('insightsEmail').value;
+            if (!email) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            // In a real app, this would set up email notifications
+            showNotification('Monthly insights enabled! You\'ll receive your first report next month.');
+            
+            // Note: localStorage is not available in Claude.ai environment
+            // In production, this would save the preference to backend/database
+            try {
+                localStorage.setItem('insightsEmail', email);
+            } catch (e) {
+                console.log('Storage not available in this environment');
+            }
+        }
+
         // Format currency without parameter
         function formatCurrency(amount, includeSymbol = true) {
-            const currency = userProfile.currency || 'USD';
+            const currency = userProfile?.currency || 'USD';
             const symbol = currencySymbols[currency];
             const formatted = amount.toLocaleString('en-US', { 
                 minimumFractionDigits: 0, 
@@ -2018,6 +2675,749 @@
 
         function hideLoadingState() {
             // Loading states are replaced by actual content
+        }
+
+        // Budget Template Functions
+        function loadBudgetTemplate() {
+            const templateKey = document.getElementById('budgetTemplate').value;
+            if (templateKey === 'custom' || !budgetData || Object.keys(budgetData).length === 0) return;
+            
+            const template = budgetTemplates[templateKey];
+            if (!template) return;
+            
+            // Apply template adjustments
+            Object.keys(budgetData).forEach(categoryKey => {
+                Object.keys(budgetData[categoryKey].items).forEach(itemKey => {
+                    const input = document.getElementById(`${categoryKey}-${itemKey}-input`);
+                    if (input) {
+                        let adjustment = 1;
+                        if (categoryKey === 'financial' && template.adjustments.emergency) {
+                            if (itemKey === 'emergency') adjustment = template.adjustments.emergency;
+                            if (itemKey === 'retirement') adjustment = template.adjustments.retirement;
+                            if (itemKey === 'investments') adjustment = template.adjustments.investments;
+                        } else if (categoryKey === 'lifestyle' && template.adjustments.lifestyle) {
+                            adjustment = template.adjustments.lifestyle;
+                        }
+                        
+                        const baseAmount = budgetData[categoryKey].items[itemKey].amount;
+                        input.value = Math.round(baseAmount * adjustment);
+                        updateBudgetItem(categoryKey, itemKey);
+                    }
+                });
+            });
+            
+            // Show notification
+            showNotification(`Applied ${template.name} budget template`);
+        }
+
+        function saveBudgetTemplate() {
+            const name = prompt('Enter a name for this budget template:');
+            if (!name) return;
+            
+            const customTemplate = {
+                name: name,
+                date: new Date().toISOString(),
+                budget: {}
+            };
+            
+            // Collect current budget values
+            Object.keys(budgetData).forEach(categoryKey => {
+                customTemplate.budget[categoryKey] = {};
+                Object.keys(budgetData[categoryKey].items).forEach(itemKey => {
+                    const input = document.getElementById(`${categoryKey}-${itemKey}-input`);
+                    customTemplate.budget[categoryKey][itemKey] = input ? parseFloat(input.value) || 0 : 0;
+                });
+            });
+            
+            // In a real app, this would be saved to a database
+            console.log('Saved template:', customTemplate);
+            showNotification(`Budget template "${name}" saved successfully!`);
+        }
+
+        // Monthly Tracking Functions
+        function loadMonthData() {
+            const month = document.getElementById('trackingMonth').value;
+            initializeTracking();
+        }
+
+        function initializeTracking() {
+            if (!budgetData || Object.keys(budgetData).length === 0) {
+                document.getElementById('trackingContent').innerHTML = `
+                    <p style="text-align: center; color: var(--secondary); padding: 40px;">
+                        Please set up your budget first before tracking expenses.
+                    </p>
+                `;
+                return;
+            }
+            
+            let html = '';
+            let totalBudget = 0;
+            let totalActual = 0;
+            
+            Object.keys(budgetData).forEach(categoryKey => {
+                const category = budgetData[categoryKey];
+                let categoryBudget = 0;
+                let categoryActual = 0;
+                
+                html += `
+                    <div class="tracking-category">
+                        <h4>${category.icon} ${category.name}</h4>
+                `;
+                
+                Object.keys(category.items).forEach(itemKey => {
+                    const item = category.items[itemKey];
+                    const inputId = `${categoryKey}-${itemKey}-input`;
+                    const budgetAmount = parseFloat(document.getElementById(inputId)?.value) || item.amount;
+                    const actualId = `tracking-${categoryKey}-${itemKey}`;
+                    const actualAmount = monthlyTracking[actualId] || 0;
+                    
+                    categoryBudget += budgetAmount;
+                    categoryActual += actualAmount;
+                    
+                    const percentage = budgetAmount > 0 ? (actualAmount / budgetAmount * 100) : 0;
+                    const barColor = percentage > 100 ? 'var(--danger)' : percentage > 80 ? 'var(--warning)' : 'var(--success)';
+                    
+                    html += `
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>${item.name}</span>
+                                <span>
+                                    <input type="number" 
+                                           id="${actualId}" 
+                                           value="${actualAmount}"
+                                           onchange="updateTracking('${actualId}')"
+                                           style="width: 100px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px;">
+                                    / ${formatCurrency(budgetAmount)}
+                                </span>
+                            </div>
+                            <div class="tracking-bar">
+                                <div class="tracking-bar-fill" style="width: ${Math.min(percentage, 100)}%; background: ${barColor};"></div>
+                                <div class="tracking-bar-budget" style="left: 100%;"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                totalBudget += categoryBudget;
+                totalActual += categoryActual;
+                
+                html += `
+                        <div style="text-align: right; font-weight: 600; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);">
+                            Total: ${formatCurrency(categoryActual)} / ${formatCurrency(categoryBudget)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('trackingCategories').innerHTML = html;
+            
+            // Update summary
+            const variance = totalBudget - totalActual;
+            const savingsRate = ((userProfile.income - totalActual) / userProfile.income * 100).toFixed(1);
+            
+            document.getElementById('trackingBudget').textContent = formatCurrency(totalBudget);
+            document.getElementById('trackingActual').textContent = formatCurrency(totalActual);
+            document.getElementById('trackingVariance').textContent = formatCurrency(variance);
+            document.getElementById('trackingVariance').style.color = variance >= 0 ? 'white' : '#ff6b6b';
+            document.getElementById('trackingSavings').textContent = `${savingsRate}%`;
+        }
+
+        function updateTracking(id) {
+            const value = parseFloat(document.getElementById(id).value) || 0;
+            monthlyTracking[id] = value;
+            initializeTracking();
+            checkAchievements();
+        }
+
+        // Goal Calculator Functions
+        function switchGoalTab(goal) {
+            document.querySelectorAll('.goal-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(`${goal}-goal`).style.display = 'block';
+            
+            // Update tab active state
+            event.target.parentElement.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Trigger calculation
+            if (goal === 'home') calculateHomePurchase();
+            else if (goal === 'retirement') calculateRetirement();
+            else if (goal === 'education') calculateEducation();
+        }
+
+        function calculateHomePurchase() {
+            const price = parseFloat(document.getElementById('homePrice').value) || 0;
+            const downPercent = parseFloat(document.getElementById('downPaymentPercent').value) || 20;
+            const rate = parseFloat(document.getElementById('homeLoanRate').value) || 7;
+            const years = parseFloat(document.getElementById('homeLoanTerm').value) || 30;
+            
+            const downPayment = price * (downPercent / 100);
+            const loanAmount = price - downPayment;
+            const monthlyRate = rate / 100 / 12;
+            const months = years * 12;
+            
+            const emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+            const totalPayment = emi * months;
+            const totalInterest = totalPayment - loanAmount;
+            
+            // Calculate how much to save monthly for down payment
+            const targetDate = 3; // years
+            const monthlySavings = downPayment / (targetDate * 12);
+            
+            const html = `
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h4>Down Payment Required</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--primary);">
+                            ${formatCurrency(downPayment)}
+                        </p>
+                        <p>Save ${formatCurrency(monthlySavings)}/month for 3 years</p>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Monthly EMI</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--primary);">
+                            ${formatCurrency(emi)}
+                        </p>
+                        <p>For ${years} years</p>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Total Interest</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--warning);">
+                            ${formatCurrency(totalInterest)}
+                        </p>
+                        <p>${((totalInterest / loanAmount) * 100).toFixed(1)}% of loan amount</p>
+                    </div>
+                </div>
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    <span>💡</span>
+                    <div>
+                        <strong>Affordability Check:</strong> 
+                        Your EMI should not exceed ${formatCurrency(userProfile.income * 0.3)} (30% of income). 
+                        ${emi <= userProfile.income * 0.3 ? 
+                            '<span style="color: var(--success);">✅ This loan is affordable!</span>' : 
+                            '<span style="color: var(--danger);">⚠️ Consider a smaller loan or longer term.</span>'}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('homeCalculatorResult').innerHTML = html;
+        }
+
+        function calculateRetirement() {
+            const currentAge = parseFloat(document.getElementById('retireCurrentAge').value) || 30;
+            const retireAge = parseFloat(document.getElementById('retireTargetAge').value) || 60;
+            const monthlyExpense = parseFloat(document.getElementById('retireMonthlyExpense').value) || 5000;
+            const inflation = parseFloat(document.getElementById('retireInflation').value) || 6;
+            const returns = parseFloat(document.getElementById('retireReturn').value) || 10;
+            const lifeExpectancy = parseFloat(document.getElementById('retireLifeExpectancy').value) || 85;
+            
+            const yearsToRetire = retireAge - currentAge;
+            const retirementYears = lifeExpectancy - retireAge;
+            
+            // Future value of monthly expenses
+            const futureMonthlyExpense = monthlyExpense * Math.pow(1 + inflation/100, yearsToRetire);
+            
+            // Corpus needed at retirement (using 4% withdrawal rate)
+            const corpusNeeded = futureMonthlyExpense * 12 * 25;
+            
+            // Monthly investment needed
+            const monthlyReturn = returns / 100 / 12;
+            const months = yearsToRetire * 12;
+            const monthlyInvestment = corpusNeeded * monthlyReturn / (Math.pow(1 + monthlyReturn, months) - 1);
+            
+            const html = `
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h4>Corpus Needed</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--primary);">
+                            ${formatCurrency(corpusNeeded)}
+                        </p>
+                        <p>At age ${retireAge}</p>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Monthly Investment</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--success);">
+                            ${formatCurrency(monthlyInvestment)}
+                        </p>
+                        <p>For ${yearsToRetire} years</p>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Future Monthly Expense</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--warning);">
+                            ${formatCurrency(futureMonthlyExpense)}
+                        </p>
+                        <p>Adjusted for inflation</p>
+                    </div>
+                </div>
+                <div class="progress-bar" style="margin-top: 20px;">
+                    <div class="progress-fill" style="width: ${Math.min((userProfile.currentInvestments / corpusNeeded) * 100, 100)}%"></div>
+                </div>
+                <p style="text-align: center; margin-top: 10px;">
+                    Current Progress: ${((userProfile.currentInvestments / corpusNeeded) * 100).toFixed(1)}% of target
+                </p>
+            `;
+            
+            document.getElementById('retirementCalculatorResult').innerHTML = html;
+        }
+
+        function calculateEducation() {
+            const childAge = parseFloat(document.getElementById('eduChildAge').value) || 5;
+            const startAge = parseFloat(document.getElementById('eduStartAge').value) || 18;
+            const currentCost = parseFloat(document.getElementById('eduCurrentCost').value) || 50000;
+            const inflation = parseFloat(document.getElementById('eduInflation').value) || 8;
+            const years = parseFloat(document.getElementById('eduYears').value) || 4;
+            const returns = parseFloat(document.getElementById('eduReturn').value) || 10;
+            
+            const yearsToStart = startAge - childAge;
+            let totalFutureCost = 0;
+            
+            // Calculate future cost for each year
+            for (let i = 0; i < years; i++) {
+                const futureCost = currentCost * Math.pow(1 + inflation/100, yearsToStart + i);
+                totalFutureCost += futureCost;
+            }
+            
+            // Monthly investment needed
+            const monthlyReturn = returns / 100 / 12;
+            const months = yearsToStart * 12;
+            const monthlyInvestment = totalFutureCost * monthlyReturn / (Math.pow(1 + monthlyReturn, months) - 1);
+            
+            const html = `
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h4>Total Education Cost</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--primary);">
+                            ${formatCurrency(totalFutureCost)}
+                        </p>
+                        <p>For ${years} years of education</p>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Monthly Investment</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--success);">
+                            ${formatCurrency(monthlyInvestment)}
+                        </p>
+                        <p>Start now for ${yearsToStart} years</p>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Time to Start</h4>
+                        <p style="font-size: 2rem; font-weight: 700; color: var(--info);">
+                            ${yearsToStart} years
+                        </p>
+                        <p>Child will be ${startAge} years old</p>
+                    </div>
+                </div>
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    <span>💡</span>
+                    <div>
+                        <strong>Tip:</strong> Consider education insurance plans that combine investment with insurance coverage. 
+                        Starting early reduces the monthly burden significantly.
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('educationCalculatorResult').innerHTML = html;
+        }
+
+        // Investment Recommendation Functions
+        function generateInvestmentRecommendations() {
+            if (!userProfile.income) return;
+            
+            const age = userProfile.age;
+            const riskProfile = userProfile.riskTolerance;
+            
+            // Asset allocation based on age and risk
+            let allocation = {
+                equity: 0,
+                debt: 0,
+                gold: 0,
+                realEstate: 0,
+                liquid: 0
+            };
+            
+            if (riskProfile === 'aggressive') {
+                allocation.equity = Math.max(70, 100 - age);
+                allocation.debt = 20;
+                allocation.gold = 5;
+                allocation.realEstate = 5;
+            } else if (riskProfile === 'moderate') {
+                allocation.equity = Math.max(50, 80 - age);
+                allocation.debt = 30;
+                allocation.gold = 10;
+                allocation.realEstate = 10;
+            } else {
+                allocation.equity = Math.max(30, 60 - age);
+                allocation.debt = 50;
+                allocation.gold = 10;
+                allocation.realEstate = 10;
+            }
+            
+            // Ensure liquid funds
+            allocation.liquid = 100 - allocation.equity - allocation.debt - allocation.gold - allocation.realEstate;
+            
+            // Display allocation
+            let html = '<div style="margin-bottom: 20px;">';
+            Object.entries(allocation).forEach(([asset, percent]) => {
+                const colors = {
+                    equity: '#22c55e',
+                    debt: '#3b82f6',
+                    gold: '#f59e0b',
+                    realEstate: '#8b5cf6',
+                    liquid: '#06b6d4'
+                };
+                
+                html += `
+                    <div class="asset-item">
+                        <div>
+                            <strong>${asset.charAt(0).toUpperCase() + asset.slice(1)}</strong>
+                            <span style="margin-left: 10px;">${percent}%</span>
+                        </div>
+                        <div class="asset-bar">
+                            <div class="asset-bar-fill" style="width: ${percent}%; background: ${colors[asset]};"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            document.getElementById('assetAllocation').innerHTML = html;
+            
+            // Investment options
+            const investmentOptions = getInvestmentOptions(allocation, userProfile);
+            let optionsHtml = '<div class="form-grid">';
+            
+            investmentOptions.forEach(option => {
+                optionsHtml += `
+                    <div class="card" style="padding: 15px;">
+                        <h4>${option.icon} ${option.name}</h4>
+                        <p style="color: var(--secondary); font-size: 0.9rem;">${option.description}</p>
+                        <p style="margin-top: 10px;">
+                            <strong>Suggested: ${formatCurrency(option.amount)}/month</strong>
+                        </p>
+                        <p style="font-size: 0.85rem; color: var(--info);">
+                            Expected Return: ${option.returns}% p.a.
+                        </p>
+                    </div>
+                `;
+            });
+            
+            optionsHtml += '</div>';
+            document.getElementById('investmentOptions').innerHTML = optionsHtml;
+        }
+
+        function getInvestmentOptions(allocation, profile) {
+            const monthlyInvestment = profile.income * 0.2; // Assume 20% for investments
+            
+            const options = [];
+            
+            if (allocation.equity > 0) {
+                options.push({
+                    icon: '📈',
+                    name: 'Equity Mutual Funds',
+                    description: 'Diversified equity funds for long-term growth',
+                    amount: monthlyInvestment * (allocation.equity / 100),
+                    returns: '12-15'
+                });
+            }
+            
+            if (allocation.debt > 0) {
+                options.push({
+                    icon: '🏦',
+                    name: 'Debt Funds / FDs',
+                    description: 'Stable returns with capital protection',
+                    amount: monthlyInvestment * (allocation.debt / 100),
+                    returns: '6-8'
+                });
+            }
+            
+            if (allocation.gold > 0) {
+                options.push({
+                    icon: '🥇',
+                    name: 'Digital Gold / Gold ETFs',
+                    description: 'Hedge against inflation',
+                    amount: monthlyInvestment * (allocation.gold / 100),
+                    returns: '8-10'
+                });
+            }
+            
+            if (allocation.realEstate > 0) {
+                options.push({
+                    icon: '🏢',
+                    name: 'REITs',
+                    description: 'Real estate investment trusts',
+                    amount: monthlyInvestment * (allocation.realEstate / 100),
+                    returns: '10-12'
+                });
+            }
+            
+            return options;
+        }
+
+        function rebalancePortfolio() {
+            const currentValue = userProfile.currentInvestments;
+            if (currentValue === 0) {
+                alert('Please add your current investment value in the profile section first.');
+                return;
+            }
+            
+            // In a real app, this would analyze actual portfolio
+            const message = `
+                Based on your profile, your portfolio may need rebalancing:
+                
+                ✅ Increase equity allocation by 10%
+                ⚠️ Reduce debt allocation by 5%
+                ℹ️ Consider adding gold for diversification
+                
+                Next rebalancing date: ${new Date(Date.now() + 90*24*60*60*1000).toLocaleDateString()}
+            `;
+            
+            alert(message);
+        }
+
+        // Achievement System
+        function checkAchievements() {
+            const newAchievements = [];
+            
+            // Check various achievements
+            if (userProfile.currentSavings >= userProfile.income * 3 && !achievements.includes('emergency-fund')) {
+                newAchievements.push({
+                    id: 'emergency-fund',
+                    name: '🛡️ Emergency Fund Hero',
+                    description: 'Built 3 months of emergency fund'
+                });
+            }
+            
+            // Check budget adherence
+            let budgetAdherence = 0;
+            let budgetCategories = 0;
+            Object.keys(monthlyTracking).forEach(key => {
+                const actual = monthlyTracking[key];
+                const budgetKey = key.replace('tracking-', '');
+                const budgetInput = document.getElementById(`${budgetKey}-input`);
+                if (budgetInput) {
+                    const budget = parseFloat(budgetInput.value) || 0;
+                    if (actual <= budget) budgetAdherence++;
+                    budgetCategories++;
+                }
+            });
+            
+            if (budgetCategories > 0 && budgetAdherence / budgetCategories >= 0.8 && !achievements.includes('budget-master')) {
+                newAchievements.push({
+                    id: 'budget-master',
+                    name: '📊 Budget Master',
+                    description: 'Stayed within budget for 80% of categories'
+                });
+            }
+            
+            // Display new achievements
+            newAchievements.forEach(achievement => {
+                achievements.push(achievement.id);
+                showAchievement(achievement);
+            });
+        }
+
+        function showAchievement(achievement) {
+            const badge = document.createElement('div');
+            badge.className = 'achievement-badge';
+            badge.style.position = 'fixed';
+            badge.style.top = '20px';
+            badge.style.right = '20px';
+            badge.style.zIndex = '9999';
+            badge.innerHTML = `${achievement.name}`;
+            
+            document.body.appendChild(badge);
+            
+            setTimeout(() => {
+                badge.remove();
+            }, 5000);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: var(--primary);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Enhanced display functions
+        function displayBudgetPlan(budget) {
+            const container = document.getElementById('budgetContent');
+            budgetData = budget; // Store for later use
+            
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <p style="color: var(--secondary); font-size: 0.9rem;">
+                        💡 Suggested amounts are based on your profile. Adjust them to match your actual spending.
+                    </p>
+                </div>
+            `;
+            
+            Object.keys(budget).forEach(categoryKey => {
+                const category = budget[categoryKey];
+                const categoryTotal = Object.values(category.items).reduce((sum, item) => sum + item.amount, 0);
+                const categoryPercent = (categoryTotal / userProfile.income * 100).toFixed(1);
+                
+                html += `
+                    <div class="budget-category">
+                        <div class="category-header">
+                            <div style="display: flex; align-items: center; width: 100%;">
+                                <span class="category-icon">${category.icon}</span>
+                                <div style="flex: 1;">
+                                    <h3 style="margin: 0;">${category.name}</h3>
+                                    <p style="margin: 0; font-size: 0.9rem; color: var(--secondary);">
+                                        <span id="${categoryKey}-total">${formatCurrency(categoryTotal)}</span>
+                                        (<span id="${categoryKey}-percent">${categoryPercent}</span>% of income)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-progress">
+                            <div class="category-progress-fill" id="${categoryKey}-progress" style="width: ${categoryPercent}%"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                `;
+                
+                Object.keys(category.items).forEach(itemKey => {
+                    const item = category.items[itemKey];
+                    const itemId = `${categoryKey}-${itemKey}`;
+                    
+                    html += `
+                        <div style="border-bottom: 1px solid var(--light); padding: 15px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-weight: 500;">${item.name}</span>
+                                <span style="color: var(--secondary); font-size: 0.9rem;">
+                                    Suggested: ${formatCurrency(item.amount)} (${item.percent.toFixed(1)}%)
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 150px 80px; gap: 10px; align-items: center;">
+                                <div style="position: relative;">
+                                    <input type="number" 
+                                           id="${itemId}-input" 
+                                           class="budget-input"
+                                           value="${item.amount}"
+                                           min="0"
+                                           onchange="updateBudgetItem('${categoryKey}', '${itemKey}')"
+                                           style="width: 100%; padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px;">
+                                </div>
+                                <div style="text-align: center;">
+                                    <span id="${itemId}-percent" style="font-weight: 500;">
+                                        ${item.percent.toFixed(1)}% of income
+                                    </span>
+                                </div>
+                                <div id="${itemId}-status" style="text-align: center; font-size: 1.2rem;">
+                                    ${getStatusIcon(item.amount, item.amount, categoryKey)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            // Add summary section
+            html += `
+                <div class="card" style="margin-top: 30px; background: var(--gradient-1); color: white;">
+                    <h3 style="color: white; margin-bottom: 20px;">Budget Summary</h3>
+                    <div class="summary-grid" style="color: white;">
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Total Allocated</h4>
+                            <p id="totalAllocated" style="color: white;">${formatCurrency(0)}</p>
+                        </div>
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Remaining</h4>
+                            <p id="remainingBudget" style="color: white;">${formatCurrency(0)}</p>
+                        </div>
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Fixed Expenses</h4>
+                            <p style="color: white;">${formatCurrency(userProfile.totalFixedExpenses)}</p>
+                        </div>
+                        <div class="summary-item" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <h4 style="color: white; font-weight: 400;">Debt Payments</h4>
+                            <p style="color: white;">${formatCurrency(userProfile.totalDebtEmi)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            updateBudgetSummary();
+            
+            // Initialize tracking
+            initializeTracking();
+            
+            // Generate investment recommendations
+            generateInvestmentRecommendations();
+        }
+
+        // Update comprehensive analysis to trigger new features
+        function generateComprehensiveAnalysis() {
+            collectUserProfile();
+            
+            if (!userProfile.income || userProfile.income <= 0) {
+                alert('Please enter your monthly income to generate a financial plan.');
+                return;
+            }
+            
+            // Show loading state
+            showLoadingState();
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                // Calculate financial health score
+                const healthScore = calculateFinancialHealthScore();
+                
+                // Generate budget recommendations
+                const budget = generateIntelligentBudget();
+                
+                // Generate AI insights
+                const insights = generateAIInsights();
+                
+                // Generate financial projections
+                const projections = generateProjections();
+                
+                // Update UI
+                displayHealthScore(healthScore);
+                displayBudgetPlan(budget);
+                displayAIInsights(insights);
+                displayAnalysis(projections);
+                displayAdvisorRecommendations();
+                
+                // Show hidden sections
+                document.getElementById('healthScoreContainer').classList.remove('hidden');
+                document.getElementById('aiInsights').classList.remove('hidden');
+                
+                // Initialize new features
+                initializeTracking();
+                generateInvestmentRecommendations();
+                
+                // Switch to budget tab
+                document.querySelector('.tab:nth-child(2)').click();
+                
+                hideLoadingState();
+                
+                // Check for initial achievements
+                checkAchievements();
+            }, 1500);
         }
 
         function exportFinancialPlan() {
